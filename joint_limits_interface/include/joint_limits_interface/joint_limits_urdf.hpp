@@ -19,7 +19,7 @@
 
 #include <urdf/urdfdom_compatibility.h>
 #include <urdf_model/joint.h>
-#include <joint_limits_interface/joint_limits.hpp>
+#include <joint_limits/joint_limits.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 namespace joint_limits_interface
@@ -31,7 +31,7 @@ namespace joint_limits_interface
  * values. Values in \e limits not present in \e urdf_joint remain unchanged.
  * \return True if \e urdf_joint has a valid limits specification, false otherwise.
  */
-inline bool getJointLimits(urdf::JointConstSharedPtr urdf_joint, JointLimits & limits)
+inline bool getJointLimits(urdf::JointConstSharedPtr urdf_joint, joint_limits::JointLimits & limits)
 {
   if (!urdf_joint || !urdf_joint->limits)
   {
@@ -68,7 +68,7 @@ inline bool getJointLimits(urdf::JointConstSharedPtr urdf_joint, JointLimits & l
  * \param[out] soft_limits Where URDF soft joint limit data gets written into.
  * \return True if \e urdf_joint has a valid soft limits specification, false otherwise.
  */
-inline bool getSoftJointLimits(urdf::JointConstSharedPtr urdf_joint, SoftJointLimits & soft_limits)
+inline bool getSoftJointLimits(urdf::JointConstSharedPtr urdf_joint, joint_limits::SoftJointLimits & soft_limits)
 {
   if (!urdf_joint || !urdf_joint->safety)
   {
