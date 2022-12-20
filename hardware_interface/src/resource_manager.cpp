@@ -214,7 +214,7 @@ public:
       {
         // TODO(destogl): do here error management if interfaces are only partially added into
         // "available" list - this should never be the case!
-        RCUTILS_LOG_WARN_NAMED(
+        RCUTILS_LOG_DEBUG_NAMED(
           "resource_manager",
           "(hardware '%s'): '%s' command interface not in available list. "
           "This should not happen (hint: multiple cleanup calls).",
@@ -238,7 +238,7 @@ public:
       {
         // TODO(destogl): do here error management if interfaces are only partially added into
         // "available" list - this should never be the case!
-        RCUTILS_LOG_WARN_NAMED(
+        RCUTILS_LOG_DEBUG_NAMED(
           "resource_manager",
           "(hardware '%s'): '%s' state interface not in available list. "
           "This should not happen (hint: multiple cleanup calls).",
