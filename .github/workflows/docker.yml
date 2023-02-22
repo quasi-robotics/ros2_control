@@ -33,7 +33,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}_release
           tags: |
@@ -42,7 +42,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: true
@@ -73,7 +73,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}_source
           tags: |
@@ -82,7 +82,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: true

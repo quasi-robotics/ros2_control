@@ -2,6 +2,22 @@
 Changelog for package controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.8.0 (2023-02-10)
+------------------
+* Fix CMake install so overriding works (`#926 <https://github.com/ros-controls/ros2_control/issues/926>`_)
+* 🖤 Add Black formatter for Python files. (`#936 <https://github.com/ros-controls/ros2_control/issues/936>`_)
+* Add list_hardware_components CLI <https://github.com/ros-controls/ros2_control/issues/796>`_ - Adds list_hardware_components to CLI (`#891 <https://github.com/ros-controls/ros2_control/issues/891>`_)
+* Contributors: Andy McEvoy, Dr. Denis, Tyler Weaver
+
+3.7.0 (2023-01-24)
+------------------
+* Do not use CLI calls but direct API for setting parameters. (`#910 <https://github.com/ros-controls/ros2_control/issues/910>`_)
+* Optimize output of controller spawner (`#909 <https://github.com/ros-controls/ros2_control/issues/909>`_)
+* ControllerManager: catch exception by reference (`#906 <https://github.com/ros-controls/ros2_control/issues/906>`_)
+* Test fix: don't keep reference to the controller in the test when it should be destroyed in the controller manager (`#883 <https://github.com/ros-controls/ros2_control/issues/883>`_)
+* Merge branch 'fix-update-rate' into humble (`#874 <https://github.com/ros-controls/ros2_control/issues/874>`_)
+* Contributors: Christopher Wecht, Dr. Denis, Tony Najjar, sgmurray
+
 3.6.0 (2023-01-12)
 ------------------
 * Fix QoS deprecation warnings (`#879 <https://github.com/ros-controls/ros2_control/issues/879>`_)
