@@ -22,6 +22,6 @@ install(
 )
 
 ament_export_include_directories(include)
-ament_export_dependencies(rclcpp urdf)
+ament_export_dependencies(rclcpp urdf joint_limits)
 
 ament_package()
