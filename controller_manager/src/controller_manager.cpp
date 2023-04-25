@@ -1789,8 +1789,8 @@ controller_interface::return_type ControllerManager::update(
       if (controller_go)
       {
         auto controller_ret = loaded_controller.c->update(
-          time, (controller_update_rate != update_rate_ && controller_update_rate != 0)
-                  ? rclcpp::Duration::from_seconds(1.0 / controller_update_rate)
+          time, controller_update_rate != 0
+                  ? (period * controller_update_rate)
                   : period);
 
         if (controller_ret != controller_interface::return_type::OK)
