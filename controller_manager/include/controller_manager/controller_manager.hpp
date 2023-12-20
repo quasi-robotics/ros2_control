@@ -58,7 +58,7 @@ namespace controller_manager
 {
 using ControllersListIterator = std::vector<controller_manager::ControllerSpec>::const_iterator;
 
-rclcpp::NodeOptions get_cm_node_options();
+CONTROLLER_MANAGER_PUBLIC rclcpp::NodeOptions get_cm_node_options();
 
 class ControllerManager : public rclcpp::Node
 {
@@ -122,6 +122,7 @@ public:
     controller_spec.c = controller;
     controller_spec.info.name = controller_name;
     controller_spec.info.type = controller_type;
+    controller_spec.next_update_cycle_time = std::make_shared<rclcpp::Time>(0);
     return add_controller_impl(controller_spec);
   }
 
@@ -389,6 +390,29 @@ private:
     const std::vector<ControllerSpec> & controllers, int strictness,
     const ControllersListIterator controller_it);
 
+  /// A method to be used in the std::sort method to sort the controllers to be able to
+  /// execute them in a proper order
+  /**
+   * Compares the controllers ctrl_a and ctrl_b and then returns which comes first in the sequence
+   *
+   *  @note The following conditions needs to be handled while ordering the controller list
+   *  1. The controllers that do not use any state or command interfaces are updated first
+   *  2. The controllers that use only the state system interfaces only are updated next
+   *  3. The controllers that use any of an another controller's reference interface are updated
+   * before the preceding controller
+   *  4. The controllers that use the controller's estimated interfaces are updated after the
+   * preceding controller
+   *  5. The controllers that only use the hardware command interfaces are updated last
+   *  6. All inactive controllers go at the end of the list
+   *
+   * \param[in] controllers list of controllers to compare their names to interface's prefix.
+   *
+   * @return true, if ctrl_a needs to execute first, else false
+   */
+  bool controller_sorting(
+    const ControllerSpec & ctrl_a, const ControllerSpec & ctrl_b,
+    const std::vector<controller_manager::ControllerSpec> & controllers);
+
   void controller_activity_diagnostic_callback(diagnostic_updater::DiagnosticStatusWrapper & stat);
   diagnostic_updater::Updater diagnostics_updater_;
 
@@ -510,6 +534,7 @@ private:
   std::vector<std::string> activate_command_interface_request_,
     deactivate_command_interface_request_;
 
+  std::string robot_description_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscription_;
 
   struct SwitchParams

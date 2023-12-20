@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(hardware_interface LANGUAGES CXX)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-  add_compile_options(-Wall -Wextra -Wconversion)
+  add_compile_options(-Wall -Wextra -Werror=conversion -Werror=unused-but-set-variable -Werror=return-type -Werror=shadow)
 endif()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -54,23 +54,6 @@ target_compile_definitions(mock_components PRIVATE "HARDWARE_INTERFACE_BUILDING_
 pluginlib_export_plugin_description_file(
   hardware_interface mock_components_plugin_description.xml)
 
-add_library(fake_components SHARED
-  src/mock_components/generic_system.cpp
-  src/mock_components/fake_generic_system.cpp
-)
-target_compile_features(fake_components PUBLIC cxx_std_17)
-target_include_directories(fake_components PUBLIC
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/hardware_interface>
-)
-ament_target_dependencies(fake_components PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
-# Causes the visibility macros to use dllexport rather than dllimport,
-# which is appropriate when building the dll but not consuming it.
-target_compile_definitions(fake_components PRIVATE "HARDWARE_INTERFACE_BUILDING_DLL")
-
-pluginlib_export_plugin_description_file(
-  hardware_interface fake_components_plugin_description.xml)
-
 if(BUILD_TESTING)
 
   find_package(ament_cmake_gmock REQUIRED)
@@ -101,7 +84,9 @@ if(BUILD_TESTING)
     test/test_components/test_system.cpp)
   target_link_libraries(test_components hardware_interface)
   ament_target_dependencies(test_components
-    pluginlib)
+    pluginlib
+    ros2_control_test_assets
+  )
   install(TARGETS test_components
     DESTINATION lib
   )
@@ -143,7 +128,6 @@ install(
 )
 install(
   TARGETS
-    fake_components
     mock_components
     hardware_interface
   EXPORT export_hardware_interface

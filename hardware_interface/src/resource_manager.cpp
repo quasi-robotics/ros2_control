@@ -514,9 +514,18 @@ public:
     {
       check_for_duplicates(hardware_info);
       load_hardware<Actuator, ActuatorInterface>(hardware_info, actuator_loader_, container);
-      initialize_hardware(hardware_info, container.back());
-      import_state_interfaces(container.back());
-      import_command_interfaces(container.back());
+      if (initialize_hardware(hardware_info, container.back()))
+      {
+        import_state_interfaces(container.back());
+        import_command_interfaces(container.back());
+      }
+      else
+      {
+        RCUTILS_LOG_WARN_NAMED(
+          "resource_manager",
+          "Actuator hardware component '%s' from plugin '%s' failed to initialize.",
+          hardware_info.name.c_str(), hardware_info.hardware_plugin_name.c_str());
+      }
     };
 
     if (hardware_info.is_async)
@@ -535,8 +544,17 @@ public:
     {
       check_for_duplicates(hardware_info);
       load_hardware<Sensor, SensorInterface>(hardware_info, sensor_loader_, container);
-      initialize_hardware(hardware_info, container.back());
-      import_state_interfaces(container.back());
+      if (initialize_hardware(hardware_info, container.back()))
+      {
+        import_state_interfaces(container.back());
+      }
+      else
+      {
+        RCUTILS_LOG_WARN_NAMED(
+          "resource_manager",
+          "Sensor hardware component '%s' from plugin '%s' failed to initialize.",
+          hardware_info.name.c_str(), hardware_info.hardware_plugin_name.c_str());
+      }
     };
 
     if (hardware_info.is_async)
@@ -555,9 +573,18 @@ public:
     {
       check_for_duplicates(hardware_info);
       load_hardware<System, SystemInterface>(hardware_info, system_loader_, container);
-      initialize_hardware(hardware_info, container.back());
-      import_state_interfaces(container.back());
-      import_command_interfaces(container.back());
+      if (initialize_hardware(hardware_info, container.back()))
+      {
+        import_state_interfaces(container.back());
+        import_command_interfaces(container.back());
+      }
+      else
+      {
+        RCUTILS_LOG_WARN_NAMED(
+          "resource_manager",
+          "System hardware component '%s' from plugin '%s' failed to initialize.",
+          hardware_info.name.c_str(), hardware_info.hardware_plugin_name.c_str());
+      }
     };
 
     if (hardware_info.is_async)
@@ -576,9 +603,18 @@ public:
     auto init_actuators = [&](auto & container)
     {
       container.emplace_back(Actuator(std::move(actuator)));
-      initialize_hardware(hardware_info, container.back());
-      import_state_interfaces(container.back());
-      import_command_interfaces(container.back());
+      if (initialize_hardware(hardware_info, container.back()))
+      {
+        import_state_interfaces(container.back());
+        import_command_interfaces(container.back());
+      }
+      else
+      {
+        RCUTILS_LOG_WARN_NAMED(
+          "resource_manager",
+          "Actuator hardware component '%s' from plugin '%s' failed to initialize.",
+          hardware_info.name.c_str(), hardware_info.hardware_plugin_name.c_str());
+      }
     };
 
     if (hardware_info.is_async)
@@ -597,8 +633,17 @@ public:
     auto init_sensors = [&](auto & container)
     {
       container.emplace_back(Sensor(std::move(sensor)));
-      initialize_hardware(hardware_info, container.back());
-      import_state_interfaces(container.back());
+      if (initialize_hardware(hardware_info, container.back()))
+      {
+        import_state_interfaces(container.back());
+      }
+      else
+      {
+        RCUTILS_LOG_WARN_NAMED(
+          "resource_manager",
+          "Sensor hardware component '%s' from plugin '%s' failed to initialize.",
+          hardware_info.name.c_str(), hardware_info.hardware_plugin_name.c_str());
+      }
     };
 
     if (hardware_info.is_async)
@@ -617,9 +662,18 @@ public:
     auto init_systems = [&](auto & container)
     {
       container.emplace_back(System(std::move(system)));
-      initialize_hardware(hardware_info, container.back());
-      import_state_interfaces(container.back());
-      import_command_interfaces(container.back());
+      if (initialize_hardware(hardware_info, container.back()))
+      {
+        import_state_interfaces(container.back());
+        import_command_interfaces(container.back());
+      }
+      else
+      {
+        RCUTILS_LOG_WARN_NAMED(
+          "resource_manager",
+          "System hardware component '%s' from plugin '%s' failed to initialize.",
+          hardware_info.name.c_str(), hardware_info.hardware_plugin_name.c_str());
+      }
     };
 
     if (hardware_info.is_async)
@@ -713,8 +767,7 @@ void ResourceManager::load_urdf(const std::string & urdf, bool validate_interfac
   {
     if (individual_hardware_info.type == actuator_type)
     {
-      std::lock_guard<std::recursive_mutex> guard(resource_interfaces_lock_);
-      std::lock_guard<std::recursive_mutex> guard_claimed(claimed_command_interfaces_lock_);
+      std::scoped_lock guard(resource_interfaces_lock_, claimed_command_interfaces_lock_);
       resource_storage_->load_and_initialize_actuator(individual_hardware_info);
     }
     if (individual_hardware_info.type == sensor_type)
@@ -724,8 +777,7 @@ void ResourceManager::load_urdf(const std::string & urdf, bool validate_interfac
     }
     if (individual_hardware_info.type == system_type)
     {
-      std::lock_guard<std::recursive_mutex> guard(resource_interfaces_lock_);
-      std::lock_guard<std::recursive_mutex> guard_claimed(claimed_command_interfaces_lock_);
+      std::scoped_lock guard(resource_interfaces_lock_, claimed_command_interfaces_lock_);
       resource_storage_->load_and_initialize_system(individual_hardware_info);
     }
   }
@@ -789,8 +841,7 @@ bool ResourceManager::state_interface_is_available(const std::string & name) con
 void ResourceManager::import_controller_reference_interfaces(
   const std::string & controller_name, std::vector<CommandInterface> & interfaces)
 {
-  std::lock_guard<std::recursive_mutex> guard(resource_interfaces_lock_);
-  std::lock_guard<std::recursive_mutex> guard_claimed(claimed_command_interfaces_lock_);
+  std::scoped_lock guard(resource_interfaces_lock_, claimed_command_interfaces_lock_);
   auto interface_names = resource_storage_->add_command_interfaces(interfaces);
   resource_storage_->controllers_reference_interfaces_map_[controller_name] = interface_names;
 }
@@ -844,8 +895,7 @@ void ResourceManager::remove_controller_reference_interfaces(const std::string &
     resource_storage_->controllers_reference_interfaces_map_.at(controller_name);
   resource_storage_->controllers_reference_interfaces_map_.erase(controller_name);
 
-  std::lock_guard<std::recursive_mutex> guard(resource_interfaces_lock_);
-  std::lock_guard<std::recursive_mutex> guard_claimed(claimed_command_interfaces_lock_);
+  std::scoped_lock guard(resource_interfaces_lock_, claimed_command_interfaces_lock_);
   resource_storage_->remove_command_interfaces(interface_names);
 }
 
@@ -1205,12 +1255,24 @@ HardwareReadWriteStatus ResourceManager::read(
   {
     for (auto & component : components)
     {
-      if (component.read(time, period) != return_type::OK)
+      auto ret_val = component.read(time, period);
+      if (ret_val == return_type::ERROR)
       {
         read_write_status.ok = false;
         read_write_status.failed_hardware_names.push_back(component.get_name());
         resource_storage_->remove_all_hardware_interfaces_from_available_list(component.get_name());
       }
+      else if (ret_val == return_type::DEACTIVATE)
+      {
+        resource_storage_->deactivate_hardware(component);
+      }
+      // If desired: automatic re-activation. We could add a flag for this...
+      // else
+      // {
+      // using lifecycle_msgs::msg::State;
+      // rclcpp_lifecycle::State state(State::PRIMARY_STATE_ACTIVE, lifecycle_state_names::ACTIVE);
+      // set_component_state(component.get_name(), state);
+      // }
     }
   };
 
@@ -1233,11 +1295,16 @@ HardwareReadWriteStatus ResourceManager::write(
   {
     for (auto & component : components)
     {
-      if (component.write(time, period) != return_type::OK)
+      auto ret_val = component.write(time, period);
+      if (ret_val == return_type::ERROR)
       {
         read_write_status.ok = false;
         read_write_status.failed_hardware_names.push_back(component.get_name());
         resource_storage_->remove_all_hardware_interfaces_from_available_list(component.get_name());
+      }
+      else if (ret_val == return_type::DEACTIVATE)
+      {
+        resource_storage_->deactivate_hardware(component);
       }
     }
   };
@@ -1355,26 +1422,5 @@ void ResourceManager::validate_storage(
 }
 
 // END: private methods
-
-// Temporary method to keep old interface and reduce framework changes in the PRs
-void ResourceManager::activate_all_components()
-{
-  using lifecycle_msgs::msg::State;
-  rclcpp_lifecycle::State active_state(
-    State::PRIMARY_STATE_ACTIVE, hardware_interface::lifecycle_state_names::ACTIVE);
-
-  for (auto & component : resource_storage_->actuators_)
-  {
-    set_component_state(component.get_name(), active_state);
-  }
-  for (auto & component : resource_storage_->sensors_)
-  {
-    set_component_state(component.get_name(), active_state);
-  }
-  for (auto & component : resource_storage_->systems_)
-  {
-    set_component_state(component.get_name(), active_state);
-  }
-}
 
 }  // namespace hardware_interface
