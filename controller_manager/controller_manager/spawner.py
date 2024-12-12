@@ -323,7 +323,7 @@ def main(args=None):
 
                 if not args.inactive and not args.activate_as_group:
                     ret = switch_controllers(
-                        node, controller_manager_name, [], [controller_name], True, True, 5.0
+                        node, controller_manager_name, [], [controller_name], False, True, 5.0
                     )
                     if not ret.ok:
                         node.get_logger().error(
@@ -341,7 +341,7 @@ def main(args=None):
 
         if not args.inactive and args.activate_as_group:
             ret = switch_controllers(
-                node, controller_manager_name, [], controller_names, True, True, 5.0
+                node, controller_manager_name, [], controller_names, False, True, 15.0
             )
             if not ret.ok:
                 node.get_logger().error(
