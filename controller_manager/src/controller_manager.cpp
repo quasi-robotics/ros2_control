@@ -2556,7 +2556,7 @@ bool ControllerManager::controller_sorting(
           std::bind(controller_name_compare, std::placeholders::_1, controllers_list.back()));
         if (it != controllers.end())
         {
-          return std::distance(controllers.begin(), it);
+          return (size_t)std::distance(controllers.begin(), it);
         }
         return 0;
       };

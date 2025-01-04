@@ -155,7 +155,7 @@ CallbackReturn GenericSystem::on_init(const hardware_interface::HardwareInfo & i
       }
       MimicJoint mimic_joint;
       mimic_joint.joint_index = i;
-      mimic_joint.mimicked_joint_index = std::distance(info_.joints.begin(), mimicked_joint_it);
+      mimic_joint.mimicked_joint_index = (size_t)std::distance(info_.joints.begin(), mimicked_joint_it);
       auto param_it = joint.parameters.find("multiplier");
       if (param_it != joint.parameters.end())
       {
@@ -185,8 +185,7 @@ CallbackReturn GenericSystem::on_init(const hardware_interface::HardwareInfo & i
       other_interfaces_.begin(), other_interfaces_.end(), custom_interface_with_following_offset_);
     if (if_it != other_interfaces_.end())
     {
-      index_custom_interface_with_following_offset_ =
-        std::distance(other_interfaces_.begin(), if_it);
+      index_custom_interface_with_following_offset_ = (size_t)std::distance(other_interfaces_.begin(), if_it);
       RCUTILS_LOG_INFO_NAMED(
         "mock_generic_system", "Custom interface with following offset '%s' found at index: %zu.",
         custom_interface_with_following_offset_.c_str(),
@@ -371,7 +370,7 @@ return_type GenericSystem::prepare_command_mode_switch(
 
     if (joint_it_found != info_.joints.end())
     {
-      const size_t joint_index = std::distance(info_.joints.begin(), joint_it_found);
+      const size_t joint_index = (size_t)std::distance(info_.joints.begin(), joint_it_found);
       if (joint_found_in_x_requests_[joint_index] == 0)
       {
         joint_found_in_x_requests_[joint_index] = FOUND_ONCE_FLAG;
@@ -459,7 +458,7 @@ return_type GenericSystem::perform_command_mode_switch(
 
     if (joint_it_found != info_.joints.end())
     {
-      const size_t joint_index = std::distance(info_.joints.begin(), joint_it_found);
+      const size_t joint_index = (size_t)std::distance(info_.joints.begin(), joint_it_found);
 
       if (key == info_.joints[joint_index].name + "/" + hardware_interface::HW_IF_POSITION)
       {
@@ -649,7 +648,7 @@ bool GenericSystem::get_interface(
   auto it = std::find(interface_list.begin(), interface_list.end(), interface_name);
   if (it != interface_list.end())
   {
-    auto j = std::distance(interface_list.begin(), it);
+    size_t j = (size_t)std::distance(interface_list.begin(), it);
     interfaces.emplace_back(name, *it, &values[j][vector_index]);
     return true;
   }
@@ -681,7 +680,7 @@ void GenericSystem::initialize_storage_vectors(
       // If interface name is found in the interfaces list
       if (it != interfaces.end())
       {
-        auto index = std::distance(interfaces.begin(), it);
+        auto index = (size_t)std::distance(interfaces.begin(), it);
 
         // Check the initial_value param is used
         if (!interface.initial_value.empty())

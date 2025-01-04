@@ -566,7 +566,7 @@ private:
   public:
     ControllerThreadWrapper(
       std::shared_ptr<controller_interface::ControllerInterfaceBase> & controller,
-      int cm_update_rate)
+      unsigned int cm_update_rate)
     : terminated_(false), controller_(controller), thread_{}, cm_update_rate_(cm_update_rate)
     {
     }
