@@ -14,11 +14,6 @@
 
 #include "test_controller_failed_init.hpp"
 
-#include <memory>
-#include <string>
-
-#include "lifecycle_msgs/msg/transition.hpp"
-
 namespace test_controller_failed_init
 {
 TestControllerFailedInit::TestControllerFailedInit() : controller_interface::ControllerInterface()
@@ -29,14 +24,6 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 TestControllerFailedInit::on_init()
 {
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
-}
-
-controller_interface::return_type TestControllerFailedInit::init(
-  const std::string & /* controller_name */, const std::string & /* urdf */,
-  unsigned int /*cm_update_rate*/, const std::string & /*node_namespace*/,
-  const rclcpp::NodeOptions & /*node_options*/)
-{
-  return controller_interface::return_type::ERROR;
 }
 
 controller_interface::return_type TestControllerFailedInit::update(

@@ -2,6 +2,133 @@
 Changelog for package controller_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.26.0 (2025-02-07)
+-------------------
+* add a semantic command interface to "semantic_components" (`#1945 <https://github.com/ros-controls/ros2_control/issues/1945>`_)
+* Contributors: Thibault Poignonec
+
+4.25.0 (2025-01-29)
+-------------------
+* Use `target_compile_definitions` instead of installing test files (`#2009 <https://github.com/ros-controls/ros2_control/issues/2009>`_)
+* Add GPS semantic component (`#2000 <https://github.com/ros-controls/ros2_control/issues/2000>`_)
+* Contributors: Sai Kishor Kothakota, Wiktor Bajor
+
+4.24.0 (2025-01-13)
+-------------------
+* Trigger shutdown transition in destructor (`#1979 <https://github.com/ros-controls/ros2_control/issues/1979>`_)
+* Contributors: Christoph Fröhlich
+
+4.23.0 (2024-12-29)
+-------------------
+* Remove boilerplate visibility macros (`#1972 <https://github.com/ros-controls/ros2_control/issues/1972>`_)
+* Semantic components cleanup (`#1940 <https://github.com/ros-controls/ros2_control/issues/1940>`_)
+* Contributors: Bence Magyar, Wiktor Bajor
+
+4.22.0 (2024-12-20)
+-------------------
+* Fixed typo. Added s to state_interfaces\_ (`#1930 <https://github.com/ros-controls/ros2_control/issues/1930>`_)
+* [CI] Add clang job, setup concurrency, use rt_tools humble branch (`#1910 <https://github.com/ros-controls/ros2_control/issues/1910>`_)
+* Contributors: Christoph Fröhlich, louietouie
+
+4.21.0 (2024-12-06)
+-------------------
+* [Diagnostics] Add diagnostics of execution time and periodicity of the controllers and controller_manager (`#1871 <https://github.com/ros-controls/ros2_control/issues/1871>`_)
+* Contributors: Sai Kishor Kothakota
+
+4.20.0 (2024-11-08)
+-------------------
+* reset the async variables upon activation to work post exceptions (`#1860 <https://github.com/ros-controls/ros2_control/issues/1860>`_)
+* [CM] Fix controller missing update cycles in a real setup (`#1774 <https://github.com/ros-controls/ros2_control/issues/1774>`_)
+* Contributors: Sai Kishor Kothakota
+
+4.19.0 (2024-10-26)
+-------------------
+* [CM] Async Function Handler for Controllers (`#1489 <https://github.com/ros-controls/ros2_control/issues/1489>`_)
+* Check the update_rate set to the controllers to be a valid one (`#1788 <https://github.com/ros-controls/ros2_control/issues/1788>`_)
+* [PR-1689] Follow-up PR of the controller interface variants integration (`#1779 <https://github.com/ros-controls/ros2_control/issues/1779>`_)
+* Add `PoseSensor` semantic component (`#1775 <https://github.com/ros-controls/ros2_control/issues/1775>`_)
+* [RM/HW] Constify the exported state interfaces using ConstSharedPtr (`#1767 <https://github.com/ros-controls/ros2_control/issues/1767>`_)
+* Contributors: RobertWilbrandt, Sai Kishor Kothakota
+
+4.18.0 (2024-10-07)
+-------------------
+* Adapt controller Reference/StateInterfaces to New Way of Exporting (variant support) (`#1689 <https://github.com/ros-controls/ros2_control/issues/1689>`_)
+* [ControllerInterface] Fix to properly propagate the controller NodeOptions (`#1762 <https://github.com/ros-controls/ros2_control/issues/1762>`_)
+* [Controller Interface] Make assign and release interfaces virtual (`#1743 <https://github.com/ros-controls/ros2_control/issues/1743>`_)
+* Contributors: Manuel Muth, Sai Kishor Kothakota
+
+4.17.0 (2024-09-11)
+-------------------
+* Rename `get_state` and `set_state` Functions to `get/set_lifecylce_state` (variant support) (`#1683 <https://github.com/ros-controls/ros2_control/issues/1683>`_)
+* Contributors: Manuel Muth
+
+4.16.1 (2024-08-24)
+-------------------
+
+4.16.0 (2024-08-22)
+-------------------
+* Fix params_file typo in spawner and update release notes for use_global_arguments (`#1701 <https://github.com/ros-controls/ros2_control/issues/1701>`_)
+* Avoid using the global arguments for internal controller nodes (`#1694 <https://github.com/ros-controls/ros2_control/issues/1694>`_)
+* Contributors: Sai Kishor Kothakota
+
+4.15.0 (2024-08-05)
+-------------------
+
+4.14.0 (2024-07-23)
+-------------------
+* Unused header cleanup (`#1627 <https://github.com/ros-controls/ros2_control/issues/1627>`_)
+* move critical variables to the private context (`#1623 <https://github.com/ros-controls/ros2_control/issues/1623>`_)
+* Contributors: Henry Moore, Sai Kishor Kothakota
+
+4.13.0 (2024-07-08)
+-------------------
+* [ControllerChaining] Export state interfaces from chainable controllers (`#1021 <https://github.com/ros-controls/ros2_control/issues/1021>`_)
+* Contributors: Sai Kishor Kothakota
+
+4.12.0 (2024-07-01)
+-------------------
+
+4.11.0 (2024-05-14)
+-------------------
+* Fix dependencies for source build (`#1533 <https://github.com/ros-controls/ros2_control/issues/1533>`_)
+* Add find_package for ament_cmake_gen_version_h (`#1534 <https://github.com/ros-controls/ros2_control/issues/1534>`_)
+* Contributors: Christoph Fröhlich
+
+4.10.0 (2024-05-08)
+-------------------
+* Working async controllers and components [not synchronized] (`#1041 <https://github.com/ros-controls/ros2_control/issues/1041>`_)
+* Contributors: Márk Szitanics
+
+4.9.0 (2024-04-30)
+------------------
+* return the proper const object of the pointer in the const method (`#1494 <https://github.com/ros-controls/ros2_control/issues/1494>`_)
+* Contributors: Sai Kishor Kothakota
+
+4.8.0 (2024-03-27)
+------------------
+* generate version.h file per package using the ament_generate_version_header  (`#1449 <https://github.com/ros-controls/ros2_control/issues/1449>`_)
+* Use ament_cmake generated rclcpp version header (`#1448 <https://github.com/ros-controls/ros2_control/issues/1448>`_)
+* Contributors: Sai Kishor Kothakota
+
+4.7.0 (2024-03-22)
+------------------
+* add missing compiler definitions of RCLCPP_VERSION_MAJOR (`#1440 <https://github.com/ros-controls/ros2_control/issues/1440>`_)
+* Contributors: Sai Kishor Kothakota
+
+4.6.0 (2024-03-02)
+------------------
+* Add -Werror=missing-braces to compile options (`#1423 <https://github.com/ros-controls/ros2_control/issues/1423>`_)
+* added conditioning to have rolling tags compilable in older versions (`#1422 <https://github.com/ros-controls/ros2_control/issues/1422>`_)
+* Contributors: Sai Kishor Kothakota
+
+4.5.0 (2024-02-12)
+------------------
+* A method to get node options to setup the controller node #api-breaking (`#1169 <https://github.com/ros-controls/ros2_control/issues/1169>`_)
+* Contributors: Sai Kishor Kothakota
+
+4.4.0 (2024-01-31)
+------------------
+
 4.3.0 (2024-01-20)
 ------------------
 * Issue 695: Changing 'namespace\_' variables to 'node_namespace' to make it more explicit (`#1239 <https://github.com/ros-controls/ros2_control/issues/1239>`_)

@@ -22,7 +22,6 @@
 
 #include "controller_manager/controller_manager.hpp"
 #include "controller_manager_msgs/msg/hardware_component_state.hpp"
-#include "controller_manager_msgs/srv/list_controllers.hpp"
 #include "controller_manager_msgs/srv/set_hardware_component_state.hpp"
 #include "hardware_interface/types/lifecycle_state_names.hpp"
 #include "lifecycle_msgs/msg/state.hpp"
@@ -63,12 +62,10 @@ public:
   void SetUp() override
   {
     executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-    cm_ = std::make_shared<controller_manager::ControllerManager>(
-      std::make_unique<hardware_interface::ResourceManager>(), executor_, TEST_CM_NAME);
+    cm_ = std::make_shared<controller_manager::ControllerManager>(executor_, TEST_CM_NAME);
     run_updater_ = false;
 
-    cm_->set_parameter(
-      rclcpp::Parameter("robot_description", ros2_control_test_assets::minimal_robot_urdf));
+    SetUpSrvsCMExecutor();
     cm_->set_parameter(rclcpp::Parameter(
       "hardware_components_initial_state.unconfigured",
       std::vector<std::string>({TEST_SYSTEM_HARDWARE_NAME})));
@@ -76,19 +73,10 @@ public:
       "hardware_components_initial_state.inactive",
       std::vector<std::string>({TEST_SENSOR_HARDWARE_NAME})));
 
-    std::string robot_description = "";
-    cm_->get_parameter("robot_description", robot_description);
-    if (robot_description.empty())
-    {
-      throw std::runtime_error(
-        "Unable to initialize resource manager, no robot description found.");
-    }
-
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     auto msg = std_msgs::msg::String();
-    msg.data = robot_description_;
+    msg.data = ros2_control_test_assets::minimal_robot_urdf;
     cm_->robot_description_callback(msg);
-
-    SetUpSrvsCMExecutor();
   }
 
   void check_component_fileds(
@@ -207,7 +195,8 @@ public:
 TEST_F(TestControllerManagerHWManagementSrvs, list_hardware_components)
 {
   // Default status after start:
-  // checks if "configure_components_on_start" and "activate_components_on_start" are correctly read
+  // checks if "hardware_components_initial_state.unconfigured" and
+  // "hardware_components_initial_state.inactive" are correctly read
 
   list_hardware_components_and_check(
     // actuator, sensor, system
@@ -368,25 +357,11 @@ public:
   void SetUp() override
   {
     executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-    cm_ = std::make_shared<controller_manager::ControllerManager>(
-      std::make_unique<hardware_interface::ResourceManager>(), executor_, TEST_CM_NAME);
+    cm_ = std::make_shared<controller_manager::ControllerManager>(executor_, TEST_CM_NAME);
     run_updater_ = false;
 
-    // TODO(destogl): separate this to init_tests method where parameter can be set for each test
-    // separately
-    cm_->set_parameter(
-      rclcpp::Parameter("robot_description", ros2_control_test_assets::minimal_robot_urdf));
-
-    std::string robot_description = "";
-    cm_->get_parameter("robot_description", robot_description);
-    if (robot_description.empty())
-    {
-      throw std::runtime_error(
-        "Unable to initialize resource manager, no robot description found.");
-    }
-
     auto msg = std_msgs::msg::String();
-    msg.data = robot_description_;
+    msg.data = ros2_control_test_assets::minimal_robot_urdf;
     cm_->robot_description_callback(msg);
 
     SetUpSrvsCMExecutor();
@@ -395,8 +370,9 @@ public:
 
 TEST_F(TestControllerManagerHWManagementSrvsWithoutParams, test_default_activation_of_all_hardware)
 {
-  // "configure_components_on_start" and "activate_components_on_start" are not set (empty)
-  // therefore all hardware components are active
+  // "hardware_components_initial_state.unconfigured" and
+  // "hardware_components_initial_state.inactive" are not set (empty). Therefore, all hardware
+  // components are active.
   list_hardware_components_and_check(
     // actuator, sensor, system
     std::vector<uint8_t>(
@@ -416,64 +392,3 @@ TEST_F(TestControllerManagerHWManagementSrvsWithoutParams, test_default_activati
       {{false, false, false, false}, {false, false, false, false, false, false, false}},  // system
     }));
 }
-
-// BEGIN: Remove at the end of 2023
-class TestControllerManagerHWManagementSrvsOldParameters
-: public TestControllerManagerHWManagementSrvs
-{
-public:
-  void SetUp() override
-  {
-    executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-    cm_ = std::make_shared<controller_manager::ControllerManager>(
-      std::make_unique<hardware_interface::ResourceManager>(), executor_, TEST_CM_NAME);
-    run_updater_ = false;
-
-    cm_->set_parameter(
-      rclcpp::Parameter("robot_description", ros2_control_test_assets::minimal_robot_urdf));
-    cm_->set_parameter(rclcpp::Parameter(
-      "activate_components_on_start", std::vector<std::string>({TEST_ACTUATOR_HARDWARE_NAME})));
-    cm_->set_parameter(rclcpp::Parameter(
-      "configure_components_on_start", std::vector<std::string>({TEST_SENSOR_HARDWARE_NAME})));
-
-    std::string robot_description = "";
-    cm_->get_parameter("robot_description", robot_description);
-    if (robot_description.empty())
-    {
-      throw std::runtime_error(
-        "Unable to initialize resource manager, no robot description found.");
-    }
-
-    auto msg = std_msgs::msg::String();
-    msg.data = robot_description_;
-    cm_->robot_description_callback(msg);
-
-    SetUpSrvsCMExecutor();
-  }
-};
-
-TEST_F(TestControllerManagerHWManagementSrvsOldParameters, list_hardware_components)
-{
-  // Default status after start:
-  // checks if "configure_components_on_start" and "activate_components_on_start" are correctly read
-
-  list_hardware_components_and_check(
-    // actuator, sensor, system
-    std::vector<uint8_t>(
-      {LFC_STATE::PRIMARY_STATE_ACTIVE, LFC_STATE::PRIMARY_STATE_INACTIVE,
-       LFC_STATE::PRIMARY_STATE_UNCONFIGURED}),
-    std::vector<std::string>({ACTIVE, INACTIVE, UNCONFIGURED}),
-    std::vector<std::vector<std::vector<bool>>>({
-      // is available
-      {{true, true}, {true, true, true}},  // actuator
-      {{}, {true}},                        // sensor
-      {{false, false, false, false}, {false, false, false, false, false, false, false}},  // system
-    }),
-    std::vector<std::vector<std::vector<bool>>>({
-      // is claimed
-      {{false, false}, {false, false, false}},  // actuator
-      {{}, {false}},                            // sensor
-      {{false, false, false, false}, {false, false, false, false, false, false, false}},  // system
-    }));
-}
-// END: Remove at the end of 2023

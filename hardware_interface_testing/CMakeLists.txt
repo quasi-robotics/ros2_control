@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 project(hardware_interface_testing LANGUAGES CXX)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-  add_compile_options(-Wall -Wextra -Werror=conversion -Werror=unused-but-set-variable -Werror=return-type -Werror=shadow)
+  add_compile_options(-Wall -Wextra -Werror=conversion -Werror=unused-but-set-variable -Werror=return-type -Werror=shadow
+          -Werror=missing-braces)
 endif()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -22,7 +23,8 @@ endforeach()
 add_library(test_components SHARED
 test/test_components/test_actuator.cpp
 test/test_components/test_sensor.cpp
-test/test_components/test_system.cpp)
+test/test_components/test_system.cpp
+test/test_components/test_actuator_exclusive_interfaces.cpp)
 ament_target_dependencies(test_components hardware_interface pluginlib ros2_control_test_assets)
 install(TARGETS test_components
 DESTINATION lib

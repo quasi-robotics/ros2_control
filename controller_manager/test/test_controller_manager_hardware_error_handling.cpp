@@ -122,16 +122,16 @@ public:
     // check if all controllers are added correctly
     EXPECT_EQ(
       lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
-      test_controller_actuator->get_state().id());
+      test_controller_actuator->get_lifecycle_state().id());
     EXPECT_EQ(
       lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
-      test_controller_system->get_state().id());
+      test_controller_system->get_lifecycle_state().id());
     EXPECT_EQ(
       lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
-      test_broadcaster_all->get_state().id());
+      test_broadcaster_all->get_lifecycle_state().id());
     EXPECT_EQ(
       lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
-      test_broadcaster_sensor->get_state().id());
+      test_broadcaster_sensor->get_lifecycle_state().id());
 
     // configure controllers
     cm_->configure_controller(TEST_CONTROLLER_ACTUATOR_NAME);
@@ -147,14 +147,16 @@ public:
 
     EXPECT_EQ(
       lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
-      test_controller_actuator->get_state().id());
-    EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, test_controller_system->get_state().id());
-    EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, test_broadcaster_all->get_state().id());
+      test_controller_actuator->get_lifecycle_state().id());
     EXPECT_EQ(
       lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
-      test_broadcaster_sensor->get_state().id());
+      test_controller_system->get_lifecycle_state().id());
+    EXPECT_EQ(
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_broadcaster_all->get_lifecycle_state().id());
+    EXPECT_EQ(
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_broadcaster_sensor->get_lifecycle_state().id());
 
     // Start controller, will take effect at the end of the update function
     switch_test_controllers(
@@ -180,13 +182,17 @@ TEST_P(TestControllerManagerWithTestableCM, check_cached_controllers_for_hardwar
   SetupAndConfigureControllers(strictness);
 
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_controller_actuator->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_controller_actuator->get_lifecycle_state().id());
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_controller_system->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_controller_system->get_lifecycle_state().id());
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_broadcaster_all->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_broadcaster_all->get_lifecycle_state().id());
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_broadcaster_sensor->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_broadcaster_sensor->get_lifecycle_state().id());
 
   {
     auto controllers =
@@ -235,13 +241,17 @@ TEST_P(TestControllerManagerWithTestableCM, stop_controllers_on_hardware_read_er
   }
 
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_controller_actuator->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_controller_actuator->get_lifecycle_state().id());
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_controller_system->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_controller_system->get_lifecycle_state().id());
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_broadcaster_all->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_broadcaster_all->get_lifecycle_state().id());
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_broadcaster_sensor->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_broadcaster_sensor->get_lifecycle_state().id());
 
   // Execute first time without any errors
   {
@@ -278,13 +288,16 @@ TEST_P(TestControllerManagerWithTestableCM, stop_controllers_on_hardware_read_er
     EXPECT_NO_THROW(cm_->read(time_, PERIOD));
     EXPECT_EQ(
       lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
-      test_controller_actuator->get_state().id());
+      test_controller_actuator->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_controller_system->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+      test_controller_system->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, test_broadcaster_all->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_broadcaster_all->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_broadcaster_sensor->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+      test_broadcaster_sensor->get_lifecycle_state().id());
 
     EXPECT_EQ(controller_interface::return_type::OK, cm_->update(time_, PERIOD));
     EXPECT_EQ(test_controller_actuator->internal_counter, previous_counter)
@@ -350,13 +363,16 @@ TEST_P(TestControllerManagerWithTestableCM, stop_controllers_on_hardware_read_er
     EXPECT_NO_THROW(cm_->read(time_, PERIOD));
     EXPECT_EQ(
       lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
-      test_controller_actuator->get_state().id());
+      test_controller_actuator->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, test_controller_system->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_controller_system->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, test_broadcaster_all->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_broadcaster_all->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_broadcaster_sensor->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+      test_broadcaster_sensor->get_lifecycle_state().id());
 
     EXPECT_EQ(controller_interface::return_type::OK, cm_->update(time_, PERIOD));
     EXPECT_EQ(test_controller_actuator->internal_counter, previous_counter_lower)
@@ -405,6 +421,117 @@ TEST_P(TestControllerManagerWithTestableCM, stop_controllers_on_hardware_read_er
   }
 }
 
+TEST_P(TestControllerManagerWithTestableCM, stop_controllers_on_controller_error)
+{
+  auto strictness = GetParam().strictness;
+  SetupAndConfigureControllers(strictness);
+
+  rclcpp_lifecycle::State state_active(
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    hardware_interface::lifecycle_state_names::ACTIVE);
+
+  {
+    EXPECT_EQ(controller_interface::return_type::OK, cm_->update(time_, PERIOD));
+    EXPECT_GE(test_controller_actuator->internal_counter, 1u)
+      << "Controller is started at the end of update";
+    EXPECT_GE(test_controller_system->internal_counter, 1u)
+      << "Controller is started at the end of update";
+    EXPECT_GE(test_broadcaster_all->internal_counter, 1u)
+      << "Controller is started at the end of update";
+    EXPECT_GE(test_broadcaster_sensor->internal_counter, 1u)
+      << "Controller is started at the end of update";
+  }
+
+  EXPECT_EQ(
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_controller_actuator->get_lifecycle_state().id());
+  EXPECT_EQ(
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_controller_system->get_lifecycle_state().id());
+  EXPECT_EQ(
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_broadcaster_all->get_lifecycle_state().id());
+  EXPECT_EQ(
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_broadcaster_sensor->get_lifecycle_state().id());
+
+  // Execute first time without any errors
+  {
+    auto new_counter = test_controller_actuator->internal_counter + 1;
+    EXPECT_EQ(controller_interface::return_type::OK, cm_->update(time_, PERIOD));
+    EXPECT_EQ(test_controller_actuator->internal_counter, new_counter) << "Execute without errors";
+    EXPECT_EQ(test_controller_system->internal_counter, new_counter) << "Execute without errors";
+    EXPECT_EQ(test_broadcaster_all->internal_counter, new_counter) << "Execute without errors";
+    EXPECT_EQ(test_broadcaster_sensor->internal_counter, new_counter) << "Execute without errors";
+  }
+
+  // Simulate error in update method of the controllers but not in hardware
+  test_controller_actuator->external_commands_for_testing_[0] =
+    std::numeric_limits<double>::quiet_NaN();
+  test_controller_system->external_commands_for_testing_[0] =
+    std::numeric_limits<double>::quiet_NaN();
+  {
+    auto new_counter = test_controller_actuator->internal_counter + 1;
+    EXPECT_EQ(controller_interface::return_type::ERROR, cm_->update(time_, PERIOD));
+    EXPECT_EQ(test_controller_actuator->internal_counter, new_counter)
+      << "Executes the current cycle and returns ERROR";
+    EXPECT_EQ(
+      test_controller_actuator->get_lifecycle_state().id(),
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE);
+    EXPECT_EQ(test_controller_system->internal_counter, new_counter)
+      << "Executes the current cycle and returns ERROR";
+    EXPECT_EQ(
+      test_controller_system->get_lifecycle_state().id(),
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE);
+    EXPECT_EQ(test_broadcaster_all->internal_counter, new_counter)
+      << "Execute without errors to write value";
+    EXPECT_EQ(test_broadcaster_sensor->internal_counter, new_counter)
+      << "Execute without errors to write value";
+  }
+
+  {
+    auto previous_counter = test_controller_actuator->internal_counter;
+    auto new_counter = test_controller_system->internal_counter + 1;
+
+    EXPECT_EQ(
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_controller_actuator->get_lifecycle_state().id());
+    EXPECT_EQ(
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_controller_system->get_lifecycle_state().id());
+    EXPECT_EQ(
+      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+      test_broadcaster_all->get_lifecycle_state().id());
+    EXPECT_EQ(
+      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+      test_broadcaster_sensor->get_lifecycle_state().id());
+
+    EXPECT_EQ(controller_interface::return_type::OK, cm_->update(time_, PERIOD));
+    EXPECT_EQ(test_controller_actuator->internal_counter, previous_counter)
+      << "Cannot execute as it should be currently deactivated";
+    EXPECT_EQ(test_controller_system->internal_counter, previous_counter)
+      << "Cannot execute as it should be currently deactivated";
+    EXPECT_EQ(test_broadcaster_all->internal_counter, new_counter)
+      << "Broadcaster all interfaces without errors";
+    EXPECT_EQ(test_broadcaster_sensor->internal_counter, new_counter)
+      << "Execute without errors to write value";
+
+    // The states shouldn't change as there are no more controller errors
+    EXPECT_EQ(
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_controller_actuator->get_lifecycle_state().id());
+    EXPECT_EQ(
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_controller_system->get_lifecycle_state().id());
+    EXPECT_EQ(
+      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+      test_broadcaster_all->get_lifecycle_state().id());
+    EXPECT_EQ(
+      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+      test_broadcaster_sensor->get_lifecycle_state().id());
+  }
+}
+
 TEST_P(TestControllerManagerWithTestableCM, stop_controllers_on_hardware_write_error)
 {
   auto strictness = GetParam().strictness;
@@ -427,13 +554,17 @@ TEST_P(TestControllerManagerWithTestableCM, stop_controllers_on_hardware_write_e
   }
 
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_controller_actuator->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_controller_actuator->get_lifecycle_state().id());
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_controller_system->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_controller_system->get_lifecycle_state().id());
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_broadcaster_all->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_broadcaster_all->get_lifecycle_state().id());
   EXPECT_EQ(
-    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_broadcaster_sensor->get_state().id());
+    lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+    test_broadcaster_sensor->get_lifecycle_state().id());
 
   // Execute first time without any errors
   {
@@ -470,13 +601,16 @@ TEST_P(TestControllerManagerWithTestableCM, stop_controllers_on_hardware_write_e
     EXPECT_NO_THROW(cm_->write(time_, PERIOD));
     EXPECT_EQ(
       lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
-      test_controller_actuator->get_state().id());
+      test_controller_actuator->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_controller_system->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+      test_controller_system->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, test_broadcaster_all->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_broadcaster_all->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_broadcaster_sensor->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+      test_broadcaster_sensor->get_lifecycle_state().id());
 
     EXPECT_EQ(controller_interface::return_type::OK, cm_->update(time_, PERIOD));
     EXPECT_EQ(test_controller_actuator->internal_counter, previous_counter)
@@ -544,13 +678,16 @@ TEST_P(TestControllerManagerWithTestableCM, stop_controllers_on_hardware_write_e
     EXPECT_NO_THROW(cm_->write(time_, PERIOD));
     EXPECT_EQ(
       lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
-      test_controller_actuator->get_state().id());
+      test_controller_actuator->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, test_controller_system->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_controller_system->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, test_broadcaster_all->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+      test_broadcaster_all->get_lifecycle_state().id());
     EXPECT_EQ(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE, test_broadcaster_sensor->get_state().id());
+      lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+      test_broadcaster_sensor->get_lifecycle_state().id());
 
     EXPECT_EQ(controller_interface::return_type::OK, cm_->update(time_, PERIOD));
     EXPECT_EQ(test_controller_actuator->internal_counter, previous_counter_lower)
