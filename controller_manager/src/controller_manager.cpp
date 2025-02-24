@@ -3582,6 +3582,7 @@ rclcpp::NodeOptions ControllerManager::determine_controller_node_options(
   }
 
   // Add deprecation notice if the arguments are from the controller_manager node
+/*
   if (
     check_for_element(node_options_arguments, RCL_REMAP_FLAG) ||
     check_for_element(node_options_arguments, RCL_SHORT_REMAP_FLAG))
@@ -3592,7 +3593,7 @@ rclcpp::NodeOptions ControllerManager::determine_controller_node_options(
       "'--controller-ros-args' argument of the spawner to pass remapping arguments to the "
       "controller node.");
   }
-
+*/
   for (const auto & parameters_file : controller.info.parameters_files)
   {
     if (!check_for_element(node_options_arguments, RCL_ROS_ARGS_FLAG))
