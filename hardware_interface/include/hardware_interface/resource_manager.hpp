@@ -377,7 +377,7 @@ public:
   /**
    * \return map of hardware names and their status.
    */
-  std::unordered_map<std::string, HardwareComponentInfo> get_components_status();
+  const std::unordered_map<std::string, HardwareComponentInfo> & get_components_status();
 
   /// Prepare the hardware components for a new command interface mode
   /**
@@ -463,6 +463,12 @@ public:
    * \return true if interface exist, false otherwise.
    */
   bool state_interface_exists(const std::string & key) const;
+
+  /// A method to register a callback to be called when the component state changes.
+  /**
+   * \param[in] callback function to be called when the component state changes.
+   */
+  void set_on_component_state_switch_callback(std::function<void()> callback);
 
 protected:
   /// Gets the logger for the resource manager
