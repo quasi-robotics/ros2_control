@@ -128,24 +128,54 @@ int main(int argc, char ** argv)
 
       // for calculating sleep time
       auto const period = std::chrono::nanoseconds(1'000'000'000 / cm->get_update_rate());
-      rclcpp::Rate loop_rate(cm->get_update_rate());
+//      rclcpp::Rate loop_rate(cm->get_update_rate());
 
       // for calculating the measured period of the loop
-      rclcpp::Time previous_time = cm->now() - period;
+      rclcpp::Time previous_time = cm->get_trigger_clock()->now();
+      std::this_thread::sleep_for(period);
+
+      std::chrono::steady_clock::time_point next_iteration_time{std::chrono::steady_clock::now()};
 
       while (rclcpp::ok())
       {
         // calculate measured period
-        auto const current_time = cm->now();
+        auto const current_time = cm->get_trigger_clock()->now();
         auto const measured_period = current_time - previous_time;
         previous_time = current_time;
 
         // execute update loop
-        cm->read(cm->now(), measured_period);
-        cm->update(cm->now(), measured_period);
-        cm->write(cm->now(), measured_period);
+        cm->read(cm->get_trigger_clock()->now(), measured_period);
+        cm->update(cm->get_trigger_clock()->now(), measured_period);
+        cm->write(cm->get_trigger_clock()->now(), measured_period);
 
-        loop_rate.sleep();
+//        loop_rate.sleep();
+        // wait until we hit the end of the period
+        if (use_sim_time)
+        {
+          cm->get_clock()->sleep_until(current_time + period);
+        }
+        else
+        {
+          next_iteration_time += period;
+          const auto time_now = std::chrono::steady_clock::now();
+          if (next_iteration_time < time_now)
+          {
+            const double time_diff =
+              static_cast<double>(
+                std::chrono::duration_cast<std::chrono::nanoseconds>(time_now - next_iteration_time)
+                  .count()) /
+              1.e6;
+            const double cm_period = 1.e3 / static_cast<double>(cm->get_update_rate());
+            const int overrun_count = static_cast<int>(std::ceil(time_diff / cm_period));
+            RCLCPP_WARN_THROTTLE(
+              cm->get_logger(), *cm->get_clock(), 1000,
+              "Overrun detected! The controller manager missed its desired rate of %d Hz. The loop "
+              "took %f ms (missed cycles : %d).",
+              cm->get_update_rate(), time_diff + cm_period, overrun_count + 1);
+            next_iteration_time += (overrun_count * period);
+          }
+          std::this_thread::sleep_until(next_iteration_time);
+        }
       }
     });
 

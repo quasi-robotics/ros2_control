@@ -2,6 +2,82 @@
 Changelog for package hardware_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.4.0 (2025-07-21)
+------------------
+* Delete copy constructor and copy and move operators (`#2378 <https://github.com/ros-controls/ros2_control/issues/2378>`_)
+* Fix the crashing joint limiters when used with multiple interfaces (`#2371 <https://github.com/ros-controls/ros2_control/issues/2371>`_)
+* add changes to cast the other data types to double (`#2360 <https://github.com/ros-controls/ros2_control/issues/2360>`_)
+* Addition of a Default Node for Hardware Component (`#2348 <https://github.com/ros-controls/ros2_control/issues/2348>`_)
+* Add pixi workflow and dependency file (`#2338 <https://github.com/ros-controls/ros2_control/issues/2338>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota, Soham Patil
+
+5.3.0 (2025-07-02)
+------------------
+* Add deprecations to old methods not using param structs  (`#2344 <https://github.com/ros-controls/ros2_control/issues/2344>`_)
+* expose get_data_type method in loaned interfaces (`#2351 <https://github.com/ros-controls/ros2_control/issues/2351>`_)
+* Cleanup old internal API (`#2346 <https://github.com/ros-controls/ros2_control/issues/2346>`_)
+* Improve lexical casts methods (`#2343 <https://github.com/ros-controls/ros2_control/issues/2343>`_)
+* added params approach to allow propagation in gz_ros2_control (`#2340 <https://github.com/ros-controls/ros2_control/issues/2340>`_)
+* Deactivate controllers with command interfaces to hardware on DEACTIVATE (`#2334 <https://github.com/ros-controls/ros2_control/issues/2334>`_)
+* Shift to Struct based Method and Constructors, with Executor passed from CM to `on_init()` (`#2323 <https://github.com/ros-controls/ros2_control/issues/2323>`_)
+* Add string array to lexical casts (`#2333 <https://github.com/ros-controls/ros2_control/issues/2333>`_)
+* Contributors: Jordan Palacios, Marq Rasmussen, Sai Kishor Kothakota, Soham Patil
+
+5.2.0 (2025-06-07)
+------------------
+* hardware_interface: optimise & rename find_common_hardware_interfaces (`#2294 <https://github.com/ros-controls/ros2_control/issues/2294>`_)
+* also use std::mutex on macOS (`#2313 <https://github.com/ros-controls/ros2_control/issues/2313>`_)
+* Use std::mutex on windows (`#2311 <https://github.com/ros-controls/ros2_control/issues/2311>`_)
+* Contributors: Christoph Fröhlich, Daisuke Nishimatsu, Eldgar
+
+5.1.0 (2025-05-24)
+------------------
+* [RM] Isolate start and stop interfaces for each Hardware Component (`#2120 <https://github.com/ros-controls/ros2_control/issues/2120>`_)
+* Use target_link_libraries instead of ament_target_dependencies (`#2266 <https://github.com/ros-controls/ros2_control/issues/2266>`_)
+* Add new `Handle` constructor for easier initialization (`#2253 <https://github.com/ros-controls/ros2_control/issues/2253>`_)
+* Cleanup deprecations in `ros_control`  (`#2258 <https://github.com/ros-controls/ros2_control/issues/2258>`_)
+* Read `data_type` for all types of interfaces (`#2235 <https://github.com/ros-controls/ros2_control/issues/2235>`_)
+* Contributors: Sai Kishor Kothakota
+
+5.0.0 (2025-05-21)
+------------------
+* Statically allocate string concatenations using FMT formatting (`#2205 <https://github.com/ros-controls/ros2_control/issues/2205>`_)
+* Suppress the deprecation warnings of the hardware_interface API (`#2223 <https://github.com/ros-controls/ros2_control/issues/2223>`_)
+* Add `data_type` field to the HardwareInterfaces message (`#2204 <https://github.com/ros-controls/ros2_control/issues/2204>`_)
+* Contributors: Sai Kishor Kothakota, mini-1235
+
+4.29.0 (2025-05-04)
+-------------------
+* [Diagnostics] Add diagnostics of execution time and periodicity of the hardware components (`#2086 <https://github.com/ros-controls/ros2_control/issues/2086>`_)
+* Add common reusable helper methods header (`#2099 <https://github.com/ros-controls/ros2_control/issues/2099>`_)
+* Contributors: Sai Kishor Kothakota
+
+4.28.1 (2025-04-17)
+-------------------
+* Avoid running joint limit enforcement during initialization (`#2188 <https://github.com/ros-controls/ros2_control/issues/2188>`_)
+* Use previous command to enforce the joint limits on position interfaces (`#2183 <https://github.com/ros-controls/ros2_control/issues/2183>`_)
+* Add log info for the type of joint limits being used (`#2186 <https://github.com/ros-controls/ros2_control/issues/2186>`_)
+* Fix the joint limits enforcement with `position` and `velocity` (`#2182 <https://github.com/ros-controls/ros2_control/issues/2182>`_)
+* Only log limiting error if something is limited. (`#2176 <https://github.com/ros-controls/ros2_control/issues/2176>`_)
+* Contributors: Felix Exner (fexner), Sai Kishor Kothakota
+
+4.28.0 (2025-04-10)
+-------------------
+* [HW Interface] Use new handle API inside the hardware components (`#2092 <https://github.com/ros-controls/ros2_control/issues/2092>`_)
+* Integrate joint limit enforcement into `ros2_control` framework functional with Async controllers and components  (`#2047 <https://github.com/ros-controls/ros2_control/issues/2047>`_)
+* Make all packages use gmock, not gtest (`#2162 <https://github.com/ros-controls/ros2_control/issues/2162>`_)
+* Bump version of pre-commit hooks (`#2156 <https://github.com/ros-controls/ros2_control/issues/2156>`_)
+* [RM] Add error handling for missing `plugin` tags in URDF parsing (`#2138 <https://github.com/ros-controls/ros2_control/issues/2138>`_)
+* Use ros2_control_cmake (`#2134 <https://github.com/ros-controls/ros2_control/issues/2134>`_)
+* [Handle] Add support for booleans in the handles (`#2065 <https://github.com/ros-controls/ros2_control/issues/2065>`_)
+* Docs: Remove link to gazebo_ros2_control (`#2106 <https://github.com/ros-controls/ros2_control/issues/2106>`_)
+* Improve package descriptions & update maintainers (`#2103 <https://github.com/ros-controls/ros2_control/issues/2103>`_)
+* Use monotonic clock for triggering read-update-write cycles + fix for overruns (`#2046 <https://github.com/ros-controls/ros2_control/issues/2046>`_)
+* [RM] Fix skipped cycles by adjusting `rw_rate` handling (`#2091 <https://github.com/ros-controls/ros2_control/issues/2091>`_)
+* [CM] Add controller_manager activity topic (`#2006 <https://github.com/ros-controls/ros2_control/issues/2006>`_)
+* Improve API/lifecycle docs (`#2081 <https://github.com/ros-controls/ros2_control/issues/2081>`_)
+* Contributors: Bence Magyar, Christoph Fröhlich, Mehul Anand, RobertWilbrandt, Sai Kishor Kothakota, Soham Patil, github-actions[bot]
+
 4.27.0 (2025-03-01)
 -------------------
 * [HW Components] Add fix for async hardware components improper rate (`#2076 <https://github.com/ros-controls/ros2_control/issues/2076>`_)

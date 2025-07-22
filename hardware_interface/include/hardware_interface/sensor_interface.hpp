@@ -15,6 +15,8 @@
 #ifndef HARDWARE_INTERFACE__SENSOR_INTERFACE_HPP_
 #define HARDWARE_INTERFACE__SENSOR_INTERFACE_HPP_
 
+#include <fmt/compile.h>
+
 #include <limits>
 #include <memory>
 #include <string>
@@ -26,6 +28,8 @@
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/hardware_info.hpp"
 #include "hardware_interface/introspection.hpp"
+#include "hardware_interface/types/hardware_component_interface_params.hpp"
+#include "hardware_interface/types/hardware_component_params.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "hardware_interface/types/lifecycle_state_names.hpp"
 #include "lifecycle_msgs/msg/state.hpp"
@@ -76,8 +80,9 @@ class SensorInterface : public rclcpp_lifecycle::node_interfaces::LifecycleNodeI
 {
 public:
   SensorInterface()
-  : lifecycle_state_(rclcpp_lifecycle::State(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN, lifecycle_state_names::UNKNOWN)),
+  : lifecycle_state_(
+      rclcpp_lifecycle::State(
+        lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN, lifecycle_state_names::UNKNOWN)),
     sensor_logger_(rclcpp::get_logger("sensor_interface"))
   {
   }
@@ -97,18 +102,43 @@ public:
   /// clock and logger interfaces.
   /**
    * \param[in] hardware_info structure with data from URDF.
-   * \param[in] clock_interface pointer to the clock interface.
-   * \param[in] logger_interface pointer to the logger interface.
+   * \param[in] clock pointer to the resource manager clock.
+   * \param[in] logger Logger for the hardware component.
    * \returns CallbackReturn::SUCCESS if required data are provided and can be parsed.
    * \returns CallbackReturn::ERROR if any error happens or data are missing.
    */
+  [[deprecated(
+    "Replaced by CallbackReturn init(const hardware_interface::HardwareComponentParams & "
+    "params). Initialization is handled by the Framework.")]]
   CallbackReturn init(
-    const HardwareInfo & hardware_info, rclcpp::Logger logger,
-    rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface)
+    const HardwareInfo & hardware_info, rclcpp::Logger logger, rclcpp::Clock::SharedPtr clock)
   {
-    clock_interface_ = clock_interface;
-    sensor_logger_ = logger.get_child("hardware_component.sensor." + hardware_info.name);
-    info_ = hardware_info;
+    hardware_interface::HardwareComponentParams params;
+    params.hardware_info = hardware_info;
+    params.clock = clock;
+    params.logger = logger;
+    return init(params);
+  };
+
+  /// Initialization of the hardware interface from data parsed from the robot's URDF and also the
+  /// clock and logger interfaces.
+  /**
+   * \param[in] params  A struct of type HardwareComponentParams containing all necessary
+   * parameters for initializing this specific hardware component,
+   * including its HardwareInfo, a dedicated logger, a clock, and a
+   * weak_ptr to the executor.
+   * \warning The parsed executor should not be used to call `cancel()` or use blocking callbacks
+   * such as `spin()`.
+   * \returns CallbackReturn::SUCCESS if required data are provided and can be parsed.
+   * \returns CallbackReturn::ERROR if any error happens or data are missing.
+   */
+  CallbackReturn init(const hardware_interface::HardwareComponentParams & params)
+  {
+    sensor_clock_ = params.clock;
+    auto logger_copy = params.logger;
+    sensor_logger_ =
+      logger_copy.get_child("hardware_component.sensor." + params.hardware_info.name);
+    info_ = params.hardware_info;
     if (info_.is_async)
     {
       RCLCPP_INFO_STREAM(
@@ -119,7 +149,30 @@ public:
         info_.thread_priority);
       read_async_handler_->start_thread();
     }
-    return on_init(hardware_info);
+
+    if (auto locked_executor = params.executor.lock())
+    {
+      std::string node_name = params.hardware_info.name;
+      std::transform(
+        node_name.begin(), node_name.end(), node_name.begin(),
+        [](unsigned char c) { return std::tolower(c); });
+      std::replace(node_name.begin(), node_name.end(), '/', '_');
+      hardware_component_node_ = std::make_shared<rclcpp::Node>(node_name);
+      locked_executor->add_node(hardware_component_node_->get_node_base_interface());
+    }
+    else
+    {
+      RCLCPP_WARN(
+        params.logger,
+        "Executor is not available during hardware component initialization for '%s'. Skipping "
+        "node creation!",
+        params.hardware_info.name.c_str());
+    }
+
+    hardware_interface::HardwareComponentInterfaceParams interface_params;
+    interface_params.hardware_info = info_;
+    interface_params.executor = params.executor;
+    return on_init(interface_params);
   };
 
   /// Initialization of the hardware interface from data parsed from the robot's URDF.
@@ -128,12 +181,33 @@ public:
    * \returns CallbackReturn::SUCCESS if required data are provided and can be parsed.
    * \returns CallbackReturn::ERROR if any error happens or data are missing.
    */
+  [[deprecated("Use on_init(const HardwareComponentInterfaceParams & params) instead.")]]
   virtual CallbackReturn on_init(const HardwareInfo & hardware_info)
   {
     info_ = hardware_info;
     parse_state_interface_descriptions(info_.joints, joint_state_interfaces_);
     parse_state_interface_descriptions(info_.sensors, sensor_state_interfaces_);
     return CallbackReturn::SUCCESS;
+  };
+
+  /// Initialization of the hardware interface from data parsed from the robot's URDF.
+  /**
+   * \param[in] params  A struct of type hardware_interface::HardwareComponentInterfaceParams
+   * containing all necessary parameters for initializing this specific hardware component,
+   * specifically its HardwareInfo, and a weak_ptr to the executor.
+   * \warning The parsed executor should not be used to call `cancel()` or use blocking callbacks
+   * such as `spin()`.
+   * \returns CallbackReturn::SUCCESS if required data are provided and can be parsed.
+   * \returns CallbackReturn::ERROR if any error happens or data are missing.
+   */
+  virtual CallbackReturn on_init(
+    const hardware_interface::HardwareComponentInterfaceParams & params)
+  {
+    // This is done for backward compatibility with the old on_init method.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    return on_init(params.hardware_info);
+#pragma GCC diagnostic pop
   };
 
   /// Exports all state interfaces for this hardware interface.
@@ -150,9 +224,8 @@ public:
    */
   [[deprecated(
     "Replaced by vector<StateInterface::ConstSharedPtr> on_export_state_interfaces() method. "
-    "Exporting is handled "
-    "by the Framework.")]] virtual std::vector<StateInterface>
-  export_state_interfaces()
+    "Exporting is handled by the Framework.")]]
+  virtual std::vector<StateInterface> export_state_interfaces()
   {
     // return empty vector by default. For backward compatibility we try calling
     // export_state_interfaces() and only when empty vector is returned call
@@ -308,14 +381,50 @@ public:
     lifecycle_state_ = new_state;
   }
 
-  void set_state(const std::string & interface_name, const double & value)
+  template <typename T>
+  void set_state(const std::string & interface_name, const T & value)
   {
-    sensor_states_map_.at(interface_name)->set_value(value);
+    auto it = sensor_states_map_.find(interface_name);
+    if (it == sensor_states_map_.end())
+    {
+      throw std::runtime_error(
+        fmt::format(
+          FMT_COMPILE(
+            "State interface not found: {} in sensor hardware component: {}. "
+            "This should not happen."),
+          interface_name, info_.name));
+    }
+    auto & handle = it->second;
+    std::unique_lock<std::shared_mutex> lock(handle->get_mutex());
+    std::ignore = handle->set_value(lock, value);
   }
 
-  double get_state(const std::string & interface_name) const
+  template <typename T = double>
+  T get_state(const std::string & interface_name) const
   {
-    return sensor_states_map_.at(interface_name)->get_value();
+    auto it = sensor_states_map_.find(interface_name);
+    if (it == sensor_states_map_.end())
+    {
+      throw std::runtime_error(
+        fmt::format(
+          FMT_COMPILE(
+            "State interface not found: {} in sensor hardware component: {}. "
+            "This should not happen."),
+          interface_name, info_.name));
+    }
+    auto & handle = it->second;
+    std::shared_lock<std::shared_mutex> lock(handle->get_mutex());
+    const auto opt_value = handle->get_optional<T>(lock);
+    if (!opt_value)
+    {
+      throw std::runtime_error(
+        fmt::format(
+          FMT_COMPILE(
+            "Failed to get state value from interface: {}. "
+            "This should not happen."),
+          interface_name));
+    }
+    return opt_value.value();
   }
 
   /// Get the logger of the SensorInterface.
@@ -328,7 +437,13 @@ public:
   /**
    * \return clock of the SensorInterface.
    */
-  rclcpp::Clock::SharedPtr get_clock() const { return clock_interface_->get_clock(); }
+  rclcpp::Clock::SharedPtr get_clock() const { return sensor_clock_; }
+
+  /// Get the default node of the ActuatorInterface.
+  /**
+   * \return node of the ActuatorInterface.
+   */
+  rclcpp::Node::SharedPtr get_node() const { return hardware_component_node_; }
 
   /// Get the hardware info of the SensorInterface.
   /**
@@ -368,8 +483,9 @@ protected:
   std::unique_ptr<realtime_tools::AsyncFunctionHandler<return_type>> read_async_handler_;
 
 private:
-  rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface_;
+  rclcpp::Clock::SharedPtr sensor_clock_;
   rclcpp::Logger sensor_logger_;
+  rclcpp::Node::SharedPtr hardware_component_node_ = nullptr;
   // interface names to Handle accessed through getters/setters
   std::unordered_map<std::string, StateInterface::SharedPtr> sensor_states_map_;
 

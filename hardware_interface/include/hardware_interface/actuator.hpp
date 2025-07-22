@@ -23,6 +23,7 @@
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/hardware_info.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
+#include "hardware_interface/types/statistics_types.hpp"
 #include "rclcpp/duration.hpp"
 #include "rclcpp/logger.hpp"
 #include "rclcpp/node_interfaces/node_clock_interface.hpp"
@@ -44,9 +45,27 @@ public:
 
   ~Actuator() = default;
 
+  Actuator(const Actuator & other) = delete;
+
+  Actuator & operator=(const Actuator & other) = delete;
+
+  Actuator & operator=(Actuator && other) = delete;
+
+  [[deprecated(
+    "Replaced by const rclcpp_lifecycle::State & initialize(const "
+    "hardware_interface::HardwareComponentParams & params).")]]
   const rclcpp_lifecycle::State & initialize(
     const HardwareInfo & actuator_info, rclcpp::Logger logger,
     rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface);
+
+  [[deprecated(
+    "Replaced by const rclcpp_lifecycle::State & initialize(const "
+    "hardware_interface::HardwareComponentParams & params).")]]
+  const rclcpp_lifecycle::State & initialize(
+    const HardwareInfo & actuator_info, rclcpp::Logger logger, rclcpp::Clock::SharedPtr clock);
+
+  const rclcpp_lifecycle::State & initialize(
+    const hardware_interface::HardwareComponentParams & params);
 
   const rclcpp_lifecycle::State & configure();
 
@@ -82,6 +101,10 @@ public:
 
   const rclcpp::Time & get_last_write_time() const;
 
+  const HardwareComponentStatisticsCollector & get_read_statistics() const;
+
+  const HardwareComponentStatisticsCollector & get_write_statistics() const;
+
   return_type read(const rclcpp::Time & time, const rclcpp::Duration & period);
 
   return_type write(const rclcpp::Time & time, const rclcpp::Duration & period);
@@ -95,6 +118,9 @@ private:
   rclcpp::Time last_read_cycle_time_;
   // Last write cycle time
   rclcpp::Time last_write_cycle_time_;
+  // Component statistics
+  HardwareComponentStatisticsCollector read_statistics_;
+  HardwareComponentStatisticsCollector write_statistics_;
 };
 
 }  // namespace hardware_interface

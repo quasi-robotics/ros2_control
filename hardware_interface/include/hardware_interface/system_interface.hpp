@@ -15,6 +15,8 @@
 #ifndef HARDWARE_INTERFACE__SYSTEM_INTERFACE_HPP_
 #define HARDWARE_INTERFACE__SYSTEM_INTERFACE_HPP_
 
+#include <fmt/compile.h>
+
 #include <limits>
 #include <memory>
 #include <string>
@@ -26,6 +28,8 @@
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/hardware_info.hpp"
 #include "hardware_interface/introspection.hpp"
+#include "hardware_interface/types/hardware_component_interface_params.hpp"
+#include "hardware_interface/types/hardware_component_params.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "hardware_interface/types/lifecycle_state_names.hpp"
@@ -96,8 +100,9 @@ class SystemInterface : public rclcpp_lifecycle::node_interfaces::LifecycleNodeI
 {
 public:
   SystemInterface()
-  : lifecycle_state_(rclcpp_lifecycle::State(
-      lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN, lifecycle_state_names::UNKNOWN)),
+  : lifecycle_state_(
+      rclcpp_lifecycle::State(
+        lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN, lifecycle_state_names::UNKNOWN)),
     system_logger_(rclcpp::get_logger("system_interface"))
   {
   }
@@ -117,18 +122,43 @@ public:
   /// clock and logger interfaces.
   /**
    * \param[in] hardware_info structure with data from URDF.
-   * \param[in] clock_interface pointer to the clock interface.
-   * \param[in] logger_interface pointer to the logger interface.
+   * \param[in] clock pointer to the resource manager clock.
+   * \param[in] logger Logger for the hardware component.
    * \returns CallbackReturn::SUCCESS if required data are provided and can be parsed.
    * \returns CallbackReturn::ERROR if any error happens or data are missing.
    */
+  [[deprecated(
+    "Replaced by CallbackReturn init(const hardware_interface::HardwareComponentParams & "
+    "params). Initialization is handled by the Framework.")]]
   CallbackReturn init(
-    const HardwareInfo & hardware_info, rclcpp::Logger logger,
-    rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface)
+    const HardwareInfo & hardware_info, rclcpp::Logger logger, rclcpp::Clock::SharedPtr clock)
   {
-    clock_interface_ = clock_interface;
-    system_logger_ = logger.get_child("hardware_component.system." + hardware_info.name);
-    info_ = hardware_info;
+    hardware_interface::HardwareComponentParams params;
+    params.hardware_info = hardware_info;
+    params.clock = clock;
+    params.logger = logger;
+    return init(params);
+  };
+
+  /// Initialization of the hardware interface from data parsed from the robot's URDF and also the
+  /// clock and logger interfaces.
+  /**
+   * \param[in] params  A struct of type HardwareComponentParams containing all necessary
+   * parameters for initializing this specific hardware component,
+   * including its HardwareInfo, a dedicated logger, a clock, and a
+   * weak_ptr to the executor.
+   * \warning The parsed executor should not be used to call `cancel()` or use blocking callbacks
+   * such as `spin()`.
+   * \returns CallbackReturn::SUCCESS if required data are provided and can be parsed.
+   * \returns CallbackReturn::ERROR if any error happens or data are missing.
+   */
+  CallbackReturn init(const hardware_interface::HardwareComponentParams & params)
+  {
+    system_clock_ = params.clock;
+    auto logger_copy = params.logger;
+    system_logger_ =
+      logger_copy.get_child("hardware_component.system." + params.hardware_info.name);
+    info_ = params.hardware_info;
     if (info_.is_async)
     {
       RCLCPP_INFO_STREAM(
@@ -160,7 +190,30 @@ public:
         info_.thread_priority);
       async_handler_->start_thread();
     }
-    return on_init(hardware_info);
+
+    if (auto locked_executor = params.executor.lock())
+    {
+      std::string node_name = params.hardware_info.name;
+      std::transform(
+        node_name.begin(), node_name.end(), node_name.begin(),
+        [](unsigned char c) { return std::tolower(c); });
+      std::replace(node_name.begin(), node_name.end(), '/', '_');
+      hardware_component_node_ = std::make_shared<rclcpp::Node>(node_name);
+      locked_executor->add_node(hardware_component_node_->get_node_base_interface());
+    }
+    else
+    {
+      RCLCPP_WARN(
+        params.logger,
+        "Executor is not available during hardware component initialization for '%s'. Skipping "
+        "node creation!",
+        params.hardware_info.name.c_str());
+    }
+
+    hardware_interface::HardwareComponentInterfaceParams interface_params;
+    interface_params.hardware_info = info_;
+    interface_params.executor = params.executor;
+    return on_init(interface_params);
   };
 
   /// Initialization of the hardware interface from data parsed from the robot's URDF.
@@ -169,6 +222,7 @@ public:
    * \returns CallbackReturn::SUCCESS if required data are provided and can be parsed.
    * \returns CallbackReturn::ERROR if any error happens or data are missing.
    */
+  [[deprecated("Use on_init(const HardwareComponentInterfaceParams & params) instead.")]]
   virtual CallbackReturn on_init(const HardwareInfo & hardware_info)
   {
     info_ = hardware_info;
@@ -178,6 +232,26 @@ public:
     parse_command_interface_descriptions(info_.joints, joint_command_interfaces_);
     parse_command_interface_descriptions(info_.gpios, gpio_command_interfaces_);
     return CallbackReturn::SUCCESS;
+  };
+
+  /// Initialization of the hardware interface from data parsed from the robot's URDF.
+  /**
+   * \param[in] params  A struct of type hardware_interface::HardwareComponentInterfaceParams
+   * containing all necessary parameters for initializing this specific hardware component,
+   * specifically its HardwareInfo, and a weak_ptr to the executor.
+   * \warning The parsed executor should not be used to call `cancel()` or use blocking callbacks
+   * such as `spin()`.
+   * \returns CallbackReturn::SUCCESS if required data are provided and can be parsed.
+   * \returns CallbackReturn::ERROR if any error happens or data are missing.
+   */
+  virtual CallbackReturn on_init(
+    const hardware_interface::HardwareComponentInterfaceParams & params)
+  {
+    // This is done for backward compatibility with the old on_init method.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    return on_init(params.hardware_info);
+#pragma GCC diagnostic pop
   };
 
   /// Exports all state interfaces for this hardware interface.
@@ -194,9 +268,8 @@ public:
    */
   [[deprecated(
     "Replaced by vector<StateInterface::ConstSharedPtr> on_export_state_interfaces() method. "
-    "Exporting is handled "
-    "by the Framework.")]] virtual std::vector<StateInterface>
-  export_state_interfaces()
+    "Exporting is handled by the Framework.")]]
+  virtual std::vector<StateInterface> export_state_interfaces()
   {
     // return empty vector by default. For backward compatibility we try calling
     // export_state_interfaces() and only when empty vector is returned call
@@ -285,10 +358,8 @@ public:
    */
   [[deprecated(
     "Replaced by vector<CommandInterface::SharedPtr> on_export_command_interfaces() method. "
-    "Exporting is "
-    "handled "
-    "by the Framework.")]] virtual std::vector<CommandInterface>
-  export_command_interfaces()
+    "Exporting is handled by the Framework.")]]
+  virtual std::vector<CommandInterface> export_command_interfaces()
   {
     // return empty vector by default. For backward compatibility we try calling
     // export_command_interfaces() and only when empty vector is returned call
@@ -363,12 +434,10 @@ public:
    *
    * \note This is a non-realtime evaluation of whether a set of command interface claims are
    * possible, and call to start preparing data structures for the upcoming switch that will occur.
-   * \note All starting and stopping interface keys are passed to all components, so the function
-   * should return return_type::OK by default when given interface keys not relevant for this
-   * component. \param[in] start_interfaces vector of string identifiers for the command interfaces
-   * starting. \param[in] stop_interfaces vector of string identifiers for the command interfaces
-   * stopping. \return return_type::OK if the new command interface combination can be prepared, or
-   * if the interface key is not relevant to this system. Returns return_type::ERROR otherwise.
+   * \param[in] start_interfaces vector of string identifiers for the command interfaces starting.
+   * \param[in] stop_interfaces vector of string identifiers for the command interfaces stopping.
+   * \return return_type::OK if the new command interface combination can be prepared (or) if the
+   * interface key is not relevant to this system. Returns return_type::ERROR otherwise.
    */
   virtual return_type prepare_command_mode_switch(
     const std::vector<std::string> & /*start_interfaces*/,
@@ -382,12 +451,10 @@ public:
    * Perform the mode-switching for the new command interface combination.
    *
    * \note This is part of the realtime update loop, and should be fast.
-   * \note All starting and stopping interface keys are passed to all components, so the function
-   * should return return_type::OK by default when given interface keys not relevant for this
-   * component. \param[in] start_interfaces vector of string identifiers for the command interfaces
-   * starting. \param[in] stop_interfaces vector of string identifiers for the command interfaces
-   * stopping. \return return_type::OK if the new command interface combination can be switched to,
-   * or if the interface key is not relevant to this system. Returns return_type::ERROR otherwise.
+   * \param[in] start_interfaces vector of string identifiers for the command interfaces starting.
+   * \param[in] stop_interfaces vector of string identifiers for the command interfaces stopping.
+   * \return return_type::OK if the new command interface combination can be switched to (or) if the
+   * interface key is not relevant to this system. Returns return_type::ERROR otherwise.
    */
   virtual return_type perform_command_mode_switch(
     const std::vector<std::string> & /*start_interfaces*/,
@@ -530,24 +597,92 @@ public:
     lifecycle_state_ = new_state;
   }
 
-  void set_state(const std::string & interface_name, const double & value)
+  template <typename T>
+  void set_state(const std::string & interface_name, const T & value)
   {
-    system_states_.at(interface_name)->set_value(value);
+    auto it = system_states_.find(interface_name);
+    if (it == system_states_.end())
+    {
+      throw std::runtime_error(
+        fmt::format(
+          FMT_COMPILE(
+            "State interface not found: {} in system hardware component: {}. "
+            "This should not happen."),
+          interface_name, info_.name));
+    }
+    auto & handle = it->second;
+    std::unique_lock<std::shared_mutex> lock(handle->get_mutex());
+    std::ignore = handle->set_value(lock, value);
   }
 
-  double get_state(const std::string & interface_name) const
+  template <typename T = double>
+  T get_state(const std::string & interface_name) const
   {
-    return system_states_.at(interface_name)->get_value();
+    auto it = system_states_.find(interface_name);
+    if (it == system_states_.end())
+    {
+      throw std::runtime_error(
+        fmt::format(
+          FMT_COMPILE(
+            "State interface not found: {} in system hardware component: {}. "
+            "This should not happen."),
+          interface_name, info_.name));
+    }
+    auto & handle = it->second;
+    std::shared_lock<std::shared_mutex> lock(handle->get_mutex());
+    const auto opt_value = handle->get_optional<T>(lock);
+    if (!opt_value)
+    {
+      throw std::runtime_error(
+        fmt::format(
+          FMT_COMPILE("Failed to get state value from interface: {}. This should not happen."),
+          interface_name));
+    }
+    return opt_value.value();
   }
 
-  void set_command(const std::string & interface_name, const double & value)
+  template <typename T>
+  void set_command(const std::string & interface_name, const T & value)
   {
-    system_commands_.at(interface_name)->set_value(value);
+    auto it = system_commands_.find(interface_name);
+    if (it == system_commands_.end())
+    {
+      throw std::runtime_error(
+        fmt::format(
+          FMT_COMPILE(
+            "Command interface not found: {} in system hardware component: {}. "
+            "This should not happen."),
+          interface_name, info_.name));
+    }
+    auto & handle = it->second;
+    std::unique_lock<std::shared_mutex> lock(handle->get_mutex());
+    std::ignore = handle->set_value(lock, value);
   }
 
-  double get_command(const std::string & interface_name) const
+  template <typename T = double>
+  T get_command(const std::string & interface_name) const
   {
-    return system_commands_.at(interface_name)->get_value();
+    auto it = system_commands_.find(interface_name);
+    if (it == system_commands_.end())
+    {
+      throw std::runtime_error(
+        fmt::format(
+          FMT_COMPILE(
+            "Command interface not found: {} in system hardware component: {}. "
+            "This should not happen."),
+          interface_name, info_.name));
+    }
+    auto & handle = it->second;
+    std::shared_lock<std::shared_mutex> lock(handle->get_mutex());
+    const auto opt_value = handle->get_optional<double>(lock);
+    if (!opt_value)
+    {
+      throw std::runtime_error(
+        fmt::format(
+          FMT_COMPILE("Failed to get command value from interface: {}. This should not happen."),
+          interface_name));
+    }
+    return opt_value.value();
   }
 
   /// Get the logger of the SystemInterface.
@@ -560,7 +695,13 @@ public:
   /**
    * \return clock of the SystemInterface.
    */
-  rclcpp::Clock::SharedPtr get_clock() const { return clock_interface_->get_clock(); }
+  rclcpp::Clock::SharedPtr get_clock() const { return system_clock_; }
+
+  /// Get the default node of the ActuatorInterface.
+  /**
+   * \return node of the ActuatorInterface.
+   */
+  rclcpp::Node::SharedPtr get_node() const { return hardware_component_node_; }
 
   /// Get the hardware info of the SystemInterface.
   /**
@@ -626,8 +767,9 @@ protected:
   std::vector<CommandInterface::SharedPtr> unlisted_commands_;
 
 private:
-  rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface_;
+  rclcpp::Clock::SharedPtr system_clock_;
   rclcpp::Logger system_logger_;
+  rclcpp::Node::SharedPtr hardware_component_node_ = nullptr;
   // interface names to Handle accessed through getters/setters
   std::unordered_map<std::string, StateInterface::SharedPtr> system_states_;
   std::unordered_map<std::string, CommandInterface::SharedPtr> system_commands_;

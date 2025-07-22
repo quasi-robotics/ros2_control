@@ -2,6 +2,43 @@
 Changelog for package transmission_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.4.0 (2025-07-21)
+------------------
+
+5.3.0 (2025-07-02)
+------------------
+
+5.2.0 (2025-06-07)
+------------------
+* [Transmissions] Add `absolute_position` and `torque` interfaces (`#2310 <https://github.com/ros-controls/ros2_control/issues/2310>`_)
+* Fix pre-commit (`#2277 <https://github.com/ros-controls/ros2_control/issues/2277>`_)
+* Fix fourbarlinkage (`#1837 <https://github.com/ros-controls/ros2_control/issues/1837>`_)
+* Contributors: Bartłomiej Krajewski, Jordan Palacios, Sai Kishor Kothakota
+
+5.1.0 (2025-05-24)
+------------------
+* Use target_link_libraries instead of ament_target_dependencies (`#2266 <https://github.com/ros-controls/ros2_control/issues/2266>`_)
+* Contributors: Sai Kishor Kothakota
+
+5.0.0 (2025-05-21)
+------------------
+* Statically allocate string concatenations using FMT formatting (`#2205 <https://github.com/ros-controls/ros2_control/issues/2205>`_)
+* Suppress the deprecation warnings of the hardware_interface API (`#2223 <https://github.com/ros-controls/ros2_control/issues/2223>`_)
+* Contributors: Sai Kishor Kothakota, mini-1235
+
+4.29.0 (2025-05-04)
+-------------------
+
+4.28.1 (2025-04-17)
+-------------------
+
+4.28.0 (2025-04-10)
+-------------------
+* Make all packages use gmock, not gtest (`#2162 <https://github.com/ros-controls/ros2_control/issues/2162>`_)
+* Use ros2_control_cmake (`#2134 <https://github.com/ros-controls/ros2_control/issues/2134>`_)
+* Improve package descriptions & update maintainers (`#2103 <https://github.com/ros-controls/ros2_control/issues/2103>`_)
+* Contributors: Bence Magyar, Christoph Fröhlich, Soham Patil
+
 4.27.0 (2025-03-01)
 -------------------
 
