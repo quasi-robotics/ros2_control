@@ -412,7 +412,7 @@ public:
       {
         // TODO(destogl): do here error management if interfaces are only partially added into
         // "available" list - this should never be the case!
-        RCLCPP_WARN(
+        RCLCPP_DEBUG(
           get_logger(),
           "(hardware '%s'): '%s' state interface not in available list. "
           "This should not happen (hint: multiple cleanup calls).",
