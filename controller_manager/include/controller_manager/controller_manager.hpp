@@ -28,6 +28,7 @@
 
 #include "controller_manager/controller_spec.hpp"
 #include "controller_manager_msgs/msg/controller_manager_activity.hpp"
+#include "controller_manager_msgs/srv/cleanup_controller.hpp"
 #include "controller_manager_msgs/srv/configure_controller.hpp"
 #include "controller_manager_msgs/srv/list_controller_types.hpp"
 #include "controller_manager_msgs/srv/list_controllers.hpp"
@@ -107,6 +108,8 @@ public:
     const std::string & controller_name);
 
   controller_interface::return_type unload_controller(const std::string & controller_name);
+
+  controller_interface::return_type cleanup_controller(const std::string & controller_name);
 
   std::vector<ControllerSpec> get_loaded_controllers() const;
 
@@ -206,7 +209,7 @@ public:
    * Deterministic (real-time safe) callback group for the update function. Default behavior
    * is read hardware, update controller and finally write new values to the hardware.
    */
-  // TODO(anyone): Due to issues with the MutliThreadedExecutor, this control loop does not rely on
+  // TODO(anyone): Due to issues with the MultiThreadedExecutor, this control loop does not rely on
   // the executor (see issue #260).
   // rclcpp::CallbackGroup::SharedPtr deterministic_callback_group_;
 
@@ -280,10 +283,11 @@ protected:
    *
    * \param[in] rt_controller_list controllers in the real-time list.
    * \param[in] controllers_to_activate names of the controller that have to be activated.
+   * \param[in] strictness level of strictness for activation.
    */
   void activate_controllers(
     const std::vector<ControllerSpec> & rt_controller_list,
-    const std::vector<std::string> & controllers_to_activate);
+    const std::vector<std::string> & controllers_to_activate, int strictness);
 
   void list_controllers_srv_cb(
     const std::shared_ptr<controller_manager_msgs::srv::ListControllers::Request> request,
@@ -312,6 +316,10 @@ protected:
   void unload_controller_service_cb(
     const std::shared_ptr<controller_manager_msgs::srv::UnloadController::Request> request,
     std::shared_ptr<controller_manager_msgs::srv::UnloadController::Response> response);
+
+  void cleanup_controller_service_cb(
+    const std::shared_ptr<controller_manager_msgs::srv::CleanupController::Request> request,
+    std::shared_ptr<controller_manager_msgs::srv::CleanupController::Response> response);
 
   void list_controller_types_srv_cb(
     const std::shared_ptr<controller_manager_msgs::srv::ListControllerTypes::Request> request,
@@ -457,12 +465,13 @@ private:
    *
    * \param[in] controllers list with controllers.
    * \param[in] activation_list list with controllers to activate.
+   * \param[in] deactivation_list list with controllers to deactivate.
    * \param[out] message describing the result of the check.
    * \return return_type::OK if all interfaces are available, otherwise return_type::ERROR.
    */
   controller_interface::return_type check_for_interfaces_availability_to_activate(
     const std::vector<ControllerSpec> & controllers, const std::vector<std::string> activation_list,
-    std::string & message);
+    const std::vector<std::string> deactivation_list, std::string & message);
 
   /**
    * @brief Inserts a controller into an ordered list based on dependencies to compute the
@@ -486,6 +495,14 @@ private:
   void update_list_with_controller_chain(
     const std::string & ctrl_name, std::vector<std::string>::iterator controller_iterator,
     bool append_to_controller);
+
+  /**
+   * @brief Build the controller chain topology information based on the provided controllers.
+   *  This method constructs a directed graph representing the dependencies between controllers.
+   *  It analyzes the relationships between controllers, such as which controllers depend on others,
+   *  and builds a directed graph to represent these dependencies.
+   */
+  void build_controllers_topology_info(const std::vector<ControllerSpec> & controllers);
 
   /**
    * @brief Method to publish the state of the controller manager.
@@ -640,6 +657,8 @@ private:
     switch_controller_service_;
   rclcpp::Service<controller_manager_msgs::srv::UnloadController>::SharedPtr
     unload_controller_service_;
+  rclcpp::Service<controller_manager_msgs::srv::CleanupController>::SharedPtr
+    cleanup_controller_service_;
 
   rclcpp::Service<controller_manager_msgs::srv::ListHardwareComponents>::SharedPtr
     list_hardware_components_service_;

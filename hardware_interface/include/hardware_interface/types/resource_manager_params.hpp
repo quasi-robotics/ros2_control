@@ -49,6 +49,12 @@ struct ResourceManagerParams
   rclcpp::Logger logger = rclcpp::get_logger("resource_manager");
 
   /**
+   * @brief The namespace used by the ResourceManager and its components.
+   * This is typically same as the controller manager's node namespace.
+   */
+  std::string node_namespace = "";
+
+  /**
    * @brief Shared pointer to the rclcpp::Executor instance that the
    * ResourceManager and its components (including plugins that opt-in) will use.
    * This is typically the ControllerManager's main executor.
@@ -90,6 +96,13 @@ struct ResourceManagerParams
    * or for other timing considerations.
    */
   unsigned int update_rate = 100;
+
+  /**
+   * @brief If true, the ResourceManager will catch exceptions thrown during the different
+   * operations of controllers and hardware components. If false, exceptions will propagate up
+   * and will cause the ResourceManager to crash.
+   */
+  bool handle_exceptions = true;
 };
 
 }  // namespace hardware_interface

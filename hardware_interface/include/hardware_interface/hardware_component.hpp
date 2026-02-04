@@ -51,19 +51,6 @@ public:
 
   HardwareComponent & operator=(HardwareComponent && other) = delete;
 
-  [[deprecated(
-    "Replaced by const rclcpp_lifecycle::State & initialize(const "
-    "hardware_interface::HardwareComponentParams & params).")]]
-  const rclcpp_lifecycle::State & initialize(
-    const HardwareInfo & component_info, rclcpp::Logger logger,
-    rclcpp::node_interfaces::NodeClockInterface::SharedPtr clock_interface);
-
-  [[deprecated(
-    "Replaced by const rclcpp_lifecycle::State & initialize(const "
-    "hardware_interface::HardwareComponentParams & params).")]]
-  const rclcpp_lifecycle::State & initialize(
-    const HardwareInfo & component_info, rclcpp::Logger logger, rclcpp::Clock::SharedPtr clock);
-
   const rclcpp_lifecycle::State & initialize(
     const hardware_interface::HardwareComponentParams & params);
 
@@ -96,6 +83,8 @@ public:
   const std::string & get_group_name() const;
 
   const rclcpp_lifecycle::State & get_lifecycle_state() const;
+
+  uint8_t get_lifecycle_id() const;
 
   const rclcpp::Time & get_last_read_time() const;
 

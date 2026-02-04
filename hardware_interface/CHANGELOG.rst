@@ -2,6 +2,77 @@
 Changelog for package hardware_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.4.0 (2026-02-03)
+------------------
+* Fix the node name overlapping in the Hardware Components (`#3006 <https://github.com/ros-controls/ros2_control/issues/3006>`_)
+* Resort members of InterfaceInfo to avoid ABI break (`#3001 <https://github.com/ros-controls/ros2_control/issues/3001>`_)
+* Fix disabling joint limits via URDF (`#2992 <https://github.com/ros-controls/ros2_control/issues/2992>`_)
+* Add documentation about enabling limiters (`#2993 <https://github.com/ros-controls/ros2_control/issues/2993>`_)
+* Don't throw on position joint limits in case of velocity command (`#2978 <https://github.com/ros-controls/ros2_control/issues/2978>`_)
+* Strip leading and trailing whitespaces while parsing components (`#2974 <https://github.com/ros-controls/ros2_control/issues/2974>`_)
+* Add helper method to strip whitespaces (`#2934 <https://github.com/ros-controls/ros2_control/issues/2934>`_)
+* Contributors: Christoph Fröhlich, Dr. Denis, Sai Kishor Kothakota
+
+6.3.2 (2026-01-10)
+------------------
+* Fix the duplicate entries in the controller exported interfaces (`#2951 <https://github.com/ros-controls/ros2_control/issues/2951>`_)
+* Contributors: Sai Kishor Kothakota
+
+6.3.1 (2025-12-30)
+------------------
+* Stop async thread in the destructor (`#2941 <https://github.com/ros-controls/ros2_control/issues/2941>`_)
+* Contributors: Sai Kishor Kothakota
+
+6.3.0 (2025-12-29)
+------------------
+* Use Pimpl approach for controller and hardware component interfaces (`#2898 <https://github.com/ros-controls/ros2_control/issues/2898>`_)
+* Fix missing copy and move operations of data_type\_ variable (`#2903 <https://github.com/ros-controls/ros2_control/issues/2903>`_)
+* Contributors: Sai Kishor Kothakota
+
+6.2.0 (2025-12-10)
+------------------
+* [Handle] Add support to more data types (`#2879 <https://github.com/ros-controls/ros2_control/issues/2879>`_)
+* Fix rst syntax (`#2892 <https://github.com/ros-controls/ros2_control/issues/2892>`_)
+* Fix the blocking calls of lifecycle_state in the real-time loop (`#2884 <https://github.com/ros-controls/ros2_control/issues/2884>`_)
+* remove unused async components header (`#2885 <https://github.com/ros-controls/ros2_control/issues/2885>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota
+
+6.1.0 (2025-12-01)
+------------------
+* [HardwareComponentInterface] Add get state and command interface handle methods (`#2831 <https://github.com/ros-controls/ros2_control/issues/2831>`_)
+* Use proper hardware component logger for async components (`#2860 <https://github.com/ros-controls/ros2_control/issues/2860>`_)
+* Publish all castable data types to pal_statistics (`#2633 <https://github.com/ros-controls/ros2_control/issues/2633>`_)
+* Add `handle_exceptions` parameter to controller manager (`#2807 <https://github.com/ros-controls/ros2_control/issues/2807>`_)
+* Avoid C++20 structured binding capture (`#2832 <https://github.com/ros-controls/ros2_control/issues/2832>`_)
+* Use tinyxml2 package instead of deprecated tinyxml2_vendor (`#2833 <https://github.com/ros-controls/ros2_control/issues/2833>`_)
+* Contributors: Christoph Fröhlich, James Cowsert, Noel Jiménez García, Sai Kishor Kothakota
+
+6.0.2 (2025-11-09)
+------------------
+* Auto-set joint state interfaces to zero in MockHardware (`#2788 <https://github.com/ros-controls/ros2_control/issues/2788>`_)
+* Rename hardware descriptions (`#2787 <https://github.com/ros-controls/ros2_control/issues/2787>`_)
+* Don't update MockComponent's state interfaces if command interfaces are not finite (`#2786 <https://github.com/ros-controls/ros2_control/issues/2786>`_)
+* Contributors: Christoph Fröhlich
+
+6.0.1 (2025-11-03)
+------------------
+
+6.0.0 (2025-10-27)
+------------------
+* Deactivate the controller chain upon failed group activation (`#2669 <https://github.com/ros-controls/ros2_control/issues/2669>`_)
+* Cleanup GenericSystem component code :broom:  (`#2706 <https://github.com/ros-controls/ros2_control/issues/2706>`_)
+* Fix dynamics calculation of GenericSystem component (`#2705 <https://github.com/ros-controls/ros2_control/issues/2705>`_)
+* Add `has_state` and `has_command` methods to hardware_component_interface (`#2701 <https://github.com/ros-controls/ros2_control/issues/2701>`_)
+* [GenericSystem] Initialize joint_control_mode\_ in on_configure (`#2693 <https://github.com/ros-controls/ros2_control/issues/2693>`_)
+* Cleanup deprecations (`#2589 <https://github.com/ros-controls/ros2_control/issues/2589>`_)
+* Prepare GenericSystem for other interface data types (`#2571 <https://github.com/ros-controls/ros2_control/issues/2571>`_)
+* Fix the same hardware component node naming issue with multiple controller managers setup (`#2657 <https://github.com/ros-controls/ros2_control/issues/2657>`_)
+* Deprecate thread_priority again (`#2644 <https://github.com/ros-controls/ros2_control/issues/2644>`_)
+* Add magnetic_field_sensor semantic component (`#2627 <https://github.com/ros-controls/ros2_control/issues/2627>`_)
+* Fix `RCLCPP_WARN_ONCE` within handle (`#2630 <https://github.com/ros-controls/ros2_control/issues/2630>`_)
+* Fix warnings of uninitialized registry in GenericSystem tests (`#2635 <https://github.com/ros-controls/ros2_control/issues/2635>`_)
+* Contributors: Aarav Gupta, Christoph Fröhlich, Felix Exner, Sai Kishor Kothakota
+
 5.7.0 (2025-10-03)
 ------------------
 * Cleanup deprecations for kilted release (`#2605 <https://github.com/ros-controls/ros2_control/issues/2605>`_)

@@ -2,6 +2,69 @@
 Changelog for package controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.4.0 (2026-02-03)
+------------------
+* Add a log entry if enforce_command_limits is false (`#2998 <https://github.com/ros-controls/ros2_control/issues/2998>`_)
+* Replace std::for_each with idiomatic container operations (`#2986 <https://github.com/ros-controls/ros2_control/issues/2986>`_)
+* Improve warning if spawner cannot acquire filelock (`#2970 <https://github.com/ros-controls/ros2_control/issues/2970>`_)
+* [Simulation] Catch exceptions of sleep_until context (`#2963 <https://github.com/ros-controls/ros2_control/issues/2963>`_)
+* Fix typo in TODO comments: MutliThreadedExecutor -> MultiThreadedExecutor (`#2958 <https://github.com/ros-controls/ros2_control/issues/2958>`_)
+* Contributors: Bence Magyar, Christoph Fröhlich, Sai Kishor Kothakota, Vignesh Vembar
+
+6.3.2 (2026-01-10)
+------------------
+* Fix the duplicate entries in the controller exported interfaces (`#2951 <https://github.com/ros-controls/ros2_control/issues/2951>`_)
+* Contributors: Sai Kishor Kothakota
+
+6.3.1 (2025-12-30)
+------------------
+
+6.3.0 (2025-12-29)
+------------------
+* Add new interface_configuration_types and reusable methods (`#2902 <https://github.com/ros-controls/ros2_control/issues/2902>`_)
+* Add `cleanup_controller` lifecycle transition (`#2414 <https://github.com/ros-controls/ros2_control/issues/2414>`_)
+* Contributors: Sai Kishor Kothakota, Soham Patil
+
+6.2.0 (2025-12-10)
+------------------
+* Fix the blocking calls of lifecycle_state in the real-time loop (`#2884 <https://github.com/ros-controls/ros2_control/issues/2884>`_)
+* Contributors: Sai Kishor Kothakota
+
+6.1.0 (2025-12-01)
+------------------
+* Fix the CM statistics async publish placement (`#2865 <https://github.com/ros-controls/ros2_control/issues/2865>`_)
+* Fix failing controller switch when using ::ALL command interface configuration (`#2856 <https://github.com/ros-controls/ros2_control/issues/2856>`_)
+* Add `handle_exceptions` parameter to controller manager (`#2807 <https://github.com/ros-controls/ros2_control/issues/2807>`_)
+* Calculate achievable update rate of controllers (`#2828 <https://github.com/ros-controls/ros2_control/issues/2828>`_)
+* Fix dependencies of controller_manager (`#2836 <https://github.com/ros-controls/ros2_control/issues/2836>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota
+
+6.0.2 (2025-11-09)
+------------------
+* Avoid deadlocks for failed command switching (`#2774 <https://github.com/ros-controls/ros2_control/issues/2774>`_)
+* Fix ANSI escape code pollution in log output (`#2741 <https://github.com/ros-controls/ros2_control/issues/2741>`_)
+* Contributors: Sai Kishor Kothakota, sauman raaj
+
+6.0.1 (2025-11-03)
+------------------
+* Fail early for the resource conflicts between the activating controllers (`#2760 <https://github.com/ros-controls/ros2_control/issues/2760>`_)
+* Contributors: Sai Kishor Kothakota
+
+6.0.0 (2025-10-27)
+------------------
+* Switch the default strictness to STRICT (`#2742 <https://github.com/ros-controls/ros2_control/issues/2742>`_)
+* Deactivate the whole controller chain if one of the update results in ERROR (`#2681 <https://github.com/ros-controls/ros2_control/issues/2681>`_)
+* Deactivate the controller chain upon failed group activation (`#2669 <https://github.com/ros-controls/ros2_control/issues/2669>`_)
+* Add test_test_utils to CMakeLists (`#2729 <https://github.com/ros-controls/ros2_control/issues/2729>`_)
+* Fix concurrent spinning of the test_node (`#2721 <https://github.com/ros-controls/ros2_control/issues/2721>`_)
+* [Spawner] Fix failing makedirs on multiple spawners at startup (`#2698 <https://github.com/ros-controls/ros2_control/issues/2698>`_)
+* [Spawner] Create the FileLock in the ROS_HOME location (`#2677 <https://github.com/ros-controls/ros2_control/issues/2677>`_)
+* Fix the same hardware component node naming issue with multiple controller managers setup (`#2657 <https://github.com/ros-controls/ros2_control/issues/2657>`_)
+* Move clock availability check to controller manager thread (`#2654 <https://github.com/ros-controls/ros2_control/issues/2654>`_)
+* increase tolerance of the controller manager tests (`#2629 <https://github.com/ros-controls/ros2_control/issues/2629>`_)
+* [Controllers] Set async thread properties via parameters (`#2613 <https://github.com/ros-controls/ros2_control/issues/2613>`_)
+* Contributors: Christoph Fröhlich, Erik Holum, Sai Kishor Kothakota
+
 5.7.0 (2025-10-03)
 ------------------
 * [CM] Ability to switch controllers in non-realtime loop (`#2452 <https://github.com/ros-controls/ros2_control/issues/2452>`_)

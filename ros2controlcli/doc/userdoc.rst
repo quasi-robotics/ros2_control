@@ -19,7 +19,9 @@ Currently supported commands are
     - ros2 control set_hardware_component_state
     - ros2 control switch_controllers
     - ros2 control unload_controller
+    - ros2 control cleanup_controller
     - ros2 control view_controller_chains
+    - ros2 control view_hardware_status
 
 
 list_controllers
@@ -244,13 +246,13 @@ set_controller_state
 .. code-block:: console
 
     $ ros2 control set_controller_state -h
-    usage: ros2 control set_controller_state [-h] [--spin-time SPIN_TIME] [-s] [-c CONTROLLER_MANAGER] [--include-hidden-nodes] [--ros-args ...] controller_name {inactive,active}
+    usage: ros2 control set_controller_state [-h] [--spin-time SPIN_TIME] [-s] [-c CONTROLLER_MANAGER] [--include-hidden-nodes] [--ros-args ...] controller_name {unconfigured,inactive,active}
 
     Adjust the state of the controller
 
     positional arguments:
       controller_name       Name of the controller to be changed
-      {inactive,active}     State in which the controller should be changed to
+      {unconfigured,inactive,active}     State in which the controller should be changed to
 
     options:
       -h, --help            show this help message and exit
@@ -344,6 +346,30 @@ unload_controller
                             Consider hidden nodes as well
       --ros-args ...        Pass arbitrary arguments to the executable
 
+cleanup_controller
+----------------------
+
+.. code-block:: console
+
+    $ ros2 control cleanup_controller -h
+    usage: ros2 control cleanup_controller [-h] [--spin-time SPIN_TIME] [-s] [-c CONTROLLER_MANAGER] [--include-hidden-nodes] [--ros-args ...] controller_name
+
+    Cleanup a controller in a controller manager
+
+    positional arguments:
+      controller_name       Name of the controller
+
+    options:
+      -h, --help            show this help message and exit
+      --spin-time SPIN_TIME
+                            Spin time in seconds to wait for discovery (only applies when not using an already running daemon)
+      -s, --use-sim-time    Enable ROS simulation time
+      -c CONTROLLER_MANAGER, --controller-manager CONTROLLER_MANAGER
+                            Name of the controller manager ROS node (default: controller_manager)
+      --include-hidden-nodes
+                            Consider hidden nodes as well
+      --ros-args ...        Pass arbitrary arguments to the executable
+
 view_controller_chains
 ----------------------
 
@@ -364,3 +390,24 @@ view_controller_chains
       --include-hidden-nodes
                             Consider hidden nodes as well
       --ros-args ...        Pass arbitrary arguments to the executable
+
+
+view_hardware_status
+----------------------
+
+.. code-block:: console
+
+    $ ros2 control view_hardware_status -h
+    usage: ros2 control view_hardware_status [-h] [--spin-time SPIN_TIME] [-s] [-i HARDWARE_ID] [-d DEVICE_ID]
+
+    Echo hardware status messages with filtering capabilities
+
+    options:
+      -h, --help            show this help message and exit
+      --spin-time SPIN_TIME
+                            Spin time in seconds to wait for discovery (only applies when not using an already running daemon)
+      -s, --use-sim-time    Enable ROS simulation time
+      -i HARDWARE_ID, --hardware-id HARDWARE_ID
+                            Filter by a specific hardware component ID.
+      -d DEVICE_ID, --device-id DEVICE_ID
+                            Filter by a specific device ID within a hardware component.

@@ -28,10 +28,9 @@ from controller_manager import (
     unload_controller,
     set_controller_parameters,
     set_controller_parameters_from_param_files,
-    bcolors,
 )
 from controller_manager_msgs.srv import SwitchController
-from controller_manager.controller_manager_services import ServiceNotFoundError
+from controller_manager.controller_manager_services import ServiceNotFoundError, bcolors
 
 from filelock import Timeout, FileLock
 import rclpy
@@ -51,7 +50,8 @@ def combine_name_and_namespace(name_and_namespace):
 def find_node_and_namespace(node, full_node_name):
     node_names_and_namespaces = node.get_node_names_and_namespaces()
     return first_match(
-        node_names_and_namespaces, lambda n: combine_name_and_namespace(n) == full_node_name
+        node_names_and_namespaces,
+        lambda n: combine_name_and_namespace(n) == full_node_name,
     )
 
 
@@ -178,9 +178,18 @@ def main(args=None):
 
     try:
         spawner_node_name = "spawner_" + controller_names[0]
-        lock = FileLock("/tmp/ros2-control-controller-spawner.lock")
+        # Get the environment variable $ROS_HOME or default to ~/.ros
+        ros_home = os.getenv("ROS_HOME", os.path.join(os.path.expanduser("~"), ".ros"))
+        ros_control_lock_dir = os.path.join(ros_home, "locks")
+        if not os.path.exists(ros_control_lock_dir):
+            try:
+                os.makedirs(ros_control_lock_dir)
+            except FileExistsError:
+                pass
+        lock = FileLock(f"{ros_control_lock_dir}/ros2-control-controller-spawner.lock")
         max_retries = 5
         retry_delay = 3  # seconds
+        hit_timeout = False
         for attempt in range(max_retries):
             try:
                 logger.debug(
@@ -188,20 +197,27 @@ def main(args=None):
                 )
                 # timeout after 20 seconds and try again
                 lock.acquire(timeout=20)
-                logger.debug(bcolors.OKGREEN + "Spawner lock acquired!" + bcolors.ENDC)
                 break
             except Timeout:
                 logger.warning(
                     bcolors.WARNING
-                    + f"Attempt {attempt+1} failed. Retrying in {retry_delay} seconds..."
+                    + f"Failed to acquire lock in {20} seconds. "
+                    + f"Attempt {attempt+1} of {max_retries} failed. Retrying in {retry_delay} seconds..."
                     + bcolors.ENDC
                 )
+                hit_timeout = True
                 time.sleep(retry_delay)
         else:
             logger.error(
                 bcolors.FAIL + "Failed to acquire lock after multiple attempts." + bcolors.ENDC
             )
             return 1
+
+        # print only once when the lock is finally acquired, but with info level if it failed once
+        if hit_timeout:
+            logger.info(bcolors.OKGREEN + "Spawner lock acquired!" + bcolors.ENDC)
+        else:
+            logger.debug(bcolors.OKGREEN + "Spawner lock acquired!" + bcolors.ENDC)
 
         node = Node(spawner_node_name)
         logger = node.get_logger()
