@@ -21,6 +21,10 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#if __cplusplus >= 202002L
+#include <charconv>
+#endif
+
 
 #include "hardware_interface/lexical_casts.hpp"
 
