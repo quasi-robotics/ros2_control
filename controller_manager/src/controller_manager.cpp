@@ -609,7 +609,7 @@ bool ControllerManager::shutdown_controllers()
   {
     if (is_controller_active(controller.c))
     {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
         get_logger(), "Deactivating controller '%s'", controller.c->get_node()->get_name());
       controller.c->get_node()->deactivate();
       controller.c->release_interfaces();
@@ -1040,7 +1040,8 @@ void ControllerManager::init_services()
 controller_interface::ControllerInterfaceBaseSharedPtr ControllerManager::load_controller(
   const std::string & controller_name, const std::string & controller_type)
 {
-  RCLCPP_INFO(get_logger(), "Loading controller '%s'", controller_name.c_str());
+  RCLCPP_INFO(get_logger(), "Loading controller : '%s' of type '%s'", controller_name.c_str(),
+    controller_type.c_str());
 
   if (
     !loader_->isClassAvailable(controller_type) &&
@@ -1203,9 +1204,6 @@ controller_interface::ControllerInterfaceBaseSharedPtr ControllerManager::load_c
       get_logger(), "The 'type' param was not defined for '%s'.", controller_name.c_str());
     return nullptr;
   }
-  RCLCPP_INFO(
-    get_logger(), "Loading controller : '%s' of type '%s'", controller_name.c_str(),
-    controller_type.c_str());
   return load_controller(controller_name, controller_type);
 }
 
